@@ -17,6 +17,7 @@ std::vector<Terminal *> allAirportsList;
 
 FlightAdmin *flightAdmin = new FlightAdmin(flight_admin_email, flight_admin_password);
 TrainAdmin *trainAdmin = new TrainAdmin(train_admin_email, train_admin_password);
+UserManager *userManager = new UserManager();
 
 int codeToTerminalPosition(std::vector<Terminal *> &terminalList, std::string &code)
 {
@@ -845,9 +846,8 @@ void UserManager::userRegistrationPanel()
         }
         else
         {
-            User *newUser = new User(inputs[0], inputs[1], inputs[2]);
             // writing into file is left
-            usersList.push_back(newUser);
+            this->usersList.push_back(new User(inputs[0], inputs[1], inputs[2]));
             message = "You are successfully registered.";
         }
     }
@@ -1306,10 +1306,6 @@ Transport::Transport(std::string name, std::string number, ListNode *coveringCit
     this->bookedSeats.assign(totalSeats.size(), 0);
 }
 
-// FlightAdmin flightAdmin->flight_admin_email, flight_admin_password);
-// TrainAdmin trainAdmin->train_admin_email, train_admin_password);
-UserManager userManager;
-
 void loadDataFromFiles() {}
 // void saveData(){}
 
@@ -1331,12 +1327,12 @@ void ControlPanel()
     }
     case '3':
     {
-        userManager.userRegistrationPanel();
+        userManager->userRegistrationPanel();
         break;
     }
     case '4':
     {
-        userManager.userLoginPanel();
+        userManager->userLoginPanel();
         break;
     }
     case '5':
