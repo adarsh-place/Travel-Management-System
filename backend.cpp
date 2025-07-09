@@ -752,7 +752,7 @@ void FlightAdmin::removeTransport()
     std::string flightNumber;
     printRemoveTransportPanel("Flight", flightNumber);
 
-    if (!isOnlyDigits(flightNumber))
+    if (!isOnlyDigitOrAlpha(flightNumber))
     {
         printAlert("Failed to remove Flight.\nInvalid Flight Number: " + flightNumber);
     }

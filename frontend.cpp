@@ -148,16 +148,21 @@ void printAllTerminals(std::string terminal, std::vector<Terminal *> allTerminal
         std::cout << "=====================================\n";
         std::cout << "No " + terminal + " are present.\n";
         std::cout << "=====================================\n";
-        return;
     }
-    for (auto t : allTerminals)
+    else
     {
+        int count = 1;
+        for (auto t : allTerminals)
+        {
+            std::cout << "=====================================\n";
+            std::cout << count << "\n";
+            std::cout << terminal << " Name: " << t->name << "\n";
+            std::cout << "City: " << t->city << "\n";
+            std::cout << terminal << " Code: " << t->code << "\n";
+            count++;
+        }
         std::cout << "=====================================\n";
-        std::cout << terminal << " Name: " << t->name << "\n";
-        std::cout << "City: " << t->city << "\n";
-        std::cout << terminal << " Code: " << t->code << "\n";
     }
-    std::cout << "=====================================\n";
 }
 void printTransportOrTerminalSelectionPanel(std::string transport, std::string terminal, std::vector<Train *> &allTrainsList,
                                             std::vector<Flight *> &allFlightsList, std::vector<Terminal *> &terminalsList)
