@@ -106,10 +106,6 @@ public:
     virtual void addNewTransport() = 0;
     virtual void removeTerminal() = 0;
     virtual void removeTransport() = 0;
-    void printPassword()
-    {
-        std::cout << this->email << " " << this->password << "\n";
-    }
 };
 class FlightAdmin : public Admin
 {
