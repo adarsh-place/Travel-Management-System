@@ -221,6 +221,44 @@ bool isOnlyDigitOrAlpha(std::string &str)
     return true;
 }
 
+std::string generateTrainTicketPNR()
+{
+    std::string pnr = "";
+    for (int i = 0; i < 10; i++)
+    {
+        pnr += ('0' + (std::rand() % 10));
+    }
+    return pnr;
+}
+std::string generateFlightTicketPNR()
+{
+    std::string pnr = "";
+    for (int i = 0; i < 6; i++)
+    {
+        int r = std::rand();
+        if ((r % 2) == 0)
+        {
+            pnr += ('0' + (r % 10));
+        }
+        else
+        {
+            pnr += ('A' + (r % 26));
+        }
+    }
+    return pnr;
+}
+DateTime *getCurrentDateTime()
+{
+    std::time_t now = std::time(nullptr);
+    std::tm *localTime = std::localtime(&now);
+
+    char buffer[80];
+    std::strftime(buffer, sizeof(buffer), "%d/%m/%y - %H:%M", localTime);
+    std::string formattedDateTime = buffer;
+
+    return stringToDateTime(formattedDateTime);
+}
+
 // Admin Class
 Admin::Admin(std::string email, std::string passsword)
 {
@@ -562,6 +600,7 @@ void FlightAdmin::addNewTerminal()
         }
         else
         {
+            transform(code.begin(), code.end(), code.begin(), ::toupper);
             int airportPosition = codeToTerminalPosition(allAirportsList, code);
             if (airportPosition == -1)
             {
@@ -885,10 +924,60 @@ void UserManager::userDashboard()
     }
     case '4':
     {
+        printTicketTransportSelection("View");
+        char choice2 = inputUserChoice();
+        switch (choice2)
+        {
+        case '1':
+        {
+            printAllTrainTickets(this->loggedInUser->trainTickets);
+            printContinue();
+            break;
+        }
+        case '2':
+        {
+            printAllFlightTickets(this->loggedInUser->flightTickets);
+            printContinue();
+            break;
+        }
+        case '3':
+        {
+            break;
+        }
+        default:
+        {
+            printAlert("Wrong Choice");
+            break;
+        }
+        }
         break;
     }
     case '5':
     {
+        printTicketTransportSelection("Cancel");
+        char choice2 = inputUserChoice();
+        switch (choice2)
+        {
+        case '1':
+        {
+            this->cancelTicketPanel("Train");
+            break;
+        }
+        case '2':
+        {
+            this->cancelTicketPanel("Flight");
+            break;
+        }
+        case '3':
+        {
+            break;
+        }
+        default:
+        {
+            printAlert("Wrong Choice");
+            break;
+        }
+        }
         break;
     }
     case '6':
@@ -959,13 +1048,13 @@ void UserManager::ticketBookingPanel(std::string transport)
                 Train *choosenTrain = allTrainsList[filteredTrainsPosition[trainChoice]];
                 std::string trainName = choosenTrain->name;
 
-            seatSelectionCheckPoint:
+            trainSeatSelectionCheckPoint:
                 printSeatTypeSelectionPanel("Train", trainName);
                 int seatChoice = inputNumber();
                 if (seatChoice < 0 || seatChoice > 5)
                 {
                     printAlert("Booking Failed!\nInvalid Choice");
-                    goto seatSelectionCheckPoint;
+                    goto trainSeatSelectionCheckPoint;
                 }
                 else if (seatChoice == 5)
                 {
@@ -976,8 +1065,9 @@ void UserManager::ticketBookingPanel(std::string transport)
                     seatChoice--;
                     if (choosenTrain->totalSeats[seatChoice] > choosenTrain->bookedSeats[seatChoice])
                     {
-                        choosenTrain->bookedSeats[seatChoice]--;
-                        // generate pnr;
+                        std::string pnr = generateTrainTicketPNR();
+                        loggedInUser->trainTickets.push_back(new TrainTicket(seatChoice, choosenTrain, inputs[0], inputs[1]));
+                        choosenTrain->bookedSeats[seatChoice]++;
                         // write in file;
                         printAlert("Seat Booked Successfully.");
                     }
@@ -1010,9 +1100,88 @@ void UserManager::ticketBookingPanel(std::string transport)
             else
             {
                 flightChoice--;
-                std::string flightName = allTrainsList[filteredFlightsPosition[flightChoice]]->name;
+                Flight *choosenFlight = allFlightsList[filteredFlightsPosition[flightChoice]];
+                std::string flightName = choosenFlight->name;
+
+            flightSeatSelectionCheckPoint:
                 printSeatTypeSelectionPanel("Flight", flightName);
+                int seatChoice = inputNumber();
+                if (seatChoice < 0 || seatChoice > 3)
+                {
+                    printAlert("Booking Failed!\nInvalid Choice");
+                    goto flightSeatSelectionCheckPoint;
+                }
+                else if (seatChoice == 3)
+                {
+                    printAlert("Booking Canceled");
+                }
+                else
+                {
+                    seatChoice--;
+                    if (choosenFlight->totalSeats[seatChoice] > choosenFlight->bookedSeats[seatChoice])
+                    {
+                        std::string pnr = generateFlightTicketPNR();
+                        loggedInUser->flightTickets.push_back(new FlightTicket(seatChoice, choosenFlight, inputs[0], inputs[1]));
+                        choosenFlight->bookedSeats[seatChoice]++;
+                        // write in file;
+                        printAlert("Seat Booked Successfully.");
+                    }
+                    else
+                    {
+                        printAlert("Booking Failed.\nNo seats Available");
+                    }
+                }
             }
+        }
+    }
+}
+void UserManager::cancelTicketPanel(std::string transport)
+{
+    int ticketsCt;
+    if (transport == "Train")
+    {
+        printAllTrainTickets(this->loggedInUser->trainTickets);
+        ticketsCt = this->loggedInUser->trainTickets.size();
+    }
+    else
+    {
+        printAllFlightTickets(this->loggedInUser->flightTickets);
+        ticketsCt = this->loggedInUser->flightTickets.size();
+    }
+
+    if (ticketsCt == 0)
+    {
+        printContinue();
+    }
+    else
+    {
+        int ticketChoice = inputNumber("Enter Choice number to cancel: ");
+        if (ticketChoice < 0 || ticketChoice > ticketsCt)
+        {
+            printAlert("Failed to cancel Ticket.\nInvalid Choice.");
+        }
+        else
+        {
+            ticketChoice--;
+            if (transport == "Train")
+            {
+                auto allTrainTickets = &this->loggedInUser->trainTickets;
+                int seatChoice = (*allTrainTickets)[ticketChoice]->seatChoice;
+                // increment seats in train
+                (*allTrainTickets)[ticketChoice]->trainPtr->bookedSeats[seatChoice]--;
+                // delete ticket from allTrainTickets;
+                (*allTrainTickets).erase((*allTrainTickets).begin() + ticketChoice);
+            }
+            else
+            {
+                auto allFlightTickets = &this->loggedInUser->flightTickets;
+                int seatChoice = (*allFlightTickets)[ticketChoice]->seatChoice;
+                // increment seats in flight
+                (*allFlightTickets)[ticketChoice]->flightPtr->bookedSeats[seatChoice]--;
+                // delete ticket from allFlightTickets;
+                (*allFlightTickets).erase((*allFlightTickets).begin() + ticketChoice);
+            }
+            printAlert("Ticket Canceled Successfully.");
         }
     }
 }
@@ -1095,6 +1264,32 @@ Terminal::Terminal(std::string name, std::string city, std::string code)
     this->name = name;
     this->city = city;
     this->code = code;
+}
+
+// Ticket Class
+
+// FlightTicket Class
+FlightTicket::FlightTicket(int seatChoice, Flight *flightPtr, std::string boardingTerminalCode, std::string destinationTerminalCode)
+    : flightPtr(flightPtr)
+{
+    this->seatChoice = seatChoice;
+    int board = codeToTerminalPosition(allAirportsList, boardingTerminalCode);
+    int dest = codeToTerminalPosition(allAirportsList, destinationTerminalCode);
+    this->boardingTerminal = allAirportsList[board];
+    this->destinationTerminal = allAirportsList[dest];
+    this->bookingDate = getCurrentDateTime();
+}
+
+// TrainTicket Class
+TrainTicket::TrainTicket(int seatChoice, Train *trainPtr, std::string boardingTerminalCode, std::string destinationTerminalCode)
+    : trainPtr(trainPtr)
+{
+    this->seatChoice = seatChoice;
+    int board = codeToTerminalPosition(allStationsList, boardingTerminalCode);
+    int dest = codeToTerminalPosition(allStationsList, destinationTerminalCode);
+    this->boardingTerminal = allStationsList[board];
+    this->destinationTerminal = allStationsList[dest];
+    this->bookingDate = getCurrentDateTime();
 }
 
 // Transport Class

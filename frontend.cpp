@@ -1,6 +1,9 @@
 #include <bits/stdc++.h>
 #include <conio.h>
 
+std::vector<std::string> trainSeatTypes = {"1st AC", "2nd AC", "3rd AC", "Sleeper Class"};
+std::vector<std::string> flightSeatTypes = {"Economy Class", "Business Class"};
+
 void ignoreUptoNewLine()
 {
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -104,7 +107,7 @@ void printAllFlights(std::vector<Flight *> allFlightsList, std::vector<int> posi
     if (allFlightsList.size() == 0)
     {
         std::cout << "=====================================\n";
-        std::cout << "No Flights are available";
+        std::cout << "No Flights are available\n";
         std::cout << "=====================================\n";
         return;
     }
@@ -367,6 +370,71 @@ void printBookingTransportSelection()
     std::cout << "2. Flight Booking\n";
     std::cout << "3. Go Back\n";
 }
+void printTicketTransportSelection(std::string func)
+{
+    system("cls");
+    std::cout << func << " Tickets\n";
+    std::cout << "1. Train Tickets\n";
+    std::cout << "2. Flight Tickets\n";
+    std::cout << "3. Go Back\n";
+}
+void printAllTrainTickets(std::vector<TrainTicket *> trainTickets)
+{
+    system("cls");
+    std::cout << "All Booked Train Tickets.\n";
+
+    if (trainTickets.size() == 0)
+    {
+        std::cout << "No tickets are Booked.";
+    }
+    else
+    {
+        int count = 1;
+        for (auto t : trainTickets)
+        {
+            std::cout << "==========================================================";
+            std::cout << count << "\n";
+            std::cout << "Booking Date: " << t->bookingDate->getDateTime() << "\n";
+            std::cout << "Train name: " << t->trainPtr->name << "\n";
+            std::cout << "Train number: " << t->trainPtr->number << "\n";
+            std::cout << "Boarding Station: " << t->boardingTerminal->name << "(" << t->boardingTerminal->code << ") , " << t->boardingTerminal->city << "\n";
+            std::cout << "Destination Station: " << t->destinationTerminal->name << "(" << t->destinationTerminal->code << ") , " << t->destinationTerminal->city << "\n";
+            std::cout << "Seat Class: " << trainSeatTypes[t->seatChoice] << "\n";
+            std::cout << "Booking Price: " << t->price << "\n";
+            count++;
+        }
+        std::cout << "==========================================================";
+    }
+}
+void printAllFlightTickets(std::vector<FlightTicket *> flightTickets)
+{
+    system("cls");
+    std::cout << "All Booked Flight Tickets.\n";
+
+    if (flightTickets.size() == 0)
+    {
+        std::cout << "No tickets are Booked.";
+    }
+    else
+    {
+        int count = 1;
+        for (auto t : flightTickets)
+        {
+            std::cout << "==========================================================";
+            std::cout << count << "\n";
+            std::cout << "Booking Date: " << t->bookingDate->getDateTime() << "\n";
+            std::cout << "Flight name: " << t->flightPtr->name << "\n";
+            std::cout << "Flight number: " << t->flightPtr->number << "\n";
+            std::cout << "Boarding Station: " << t->boardingTerminal->name << "(" << t->boardingTerminal->code << ") , " << t->boardingTerminal->city << "\n";
+            std::cout << "Destination Station: " << t->destinationTerminal->name << "(" << t->destinationTerminal->code << ") , " << t->destinationTerminal->city << "\n";
+            std::cout << "Seat Class: " << flightSeatTypes[t->seatChoice] << "\n";
+            std::cout << "Booking Price: " << t->price << "\n";
+            count++;
+        }
+        std::cout << "==========================================================";
+    }
+}
+
 std::vector<std::string> printTicketBookingPanel(std::string transport)
 {
     std::string boadringTerminalCode, destinationTerminalCode, journeyDate;

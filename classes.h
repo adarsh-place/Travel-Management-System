@@ -81,6 +81,8 @@ struct DateTime
     {
         return !(*this == other);
     }
+
+    std::string getDateTime() { return ""; }
 };
 struct ListNode
 {
@@ -163,7 +165,7 @@ public:
 
     void userDashboard();
     void ticketBookingPanel(std::string transport);
-
+    void cancelTicketPanel(std::string transport);
     void changeUserPassword();
     void changeUserName();
 };
@@ -178,22 +180,26 @@ public:
 class Ticket
 {
 public:
-    DateTime bookingDate;
+    DateTime *bookingDate;
     Terminal *boardingTerminal;
     Terminal *destinationTerminal;
+    int seatChoice;
+    int price = 0;
     Ticket() {}
 };
-class FlightTicket : Ticket
+class FlightTicket : public Ticket
 {
 public:
     Flight *flightPtr;
     FlightTicket() {}
+    FlightTicket(int seatChoice, Flight *flightPtr, std::string boardingTerminalCode, std::string destinationTerminalCode);
 };
-class TrainTicket : Ticket
+class TrainTicket : public Ticket
 {
 public:
     Train *trainPtr;
     TrainTicket() {}
+    TrainTicket(int seatChoice, Train *trainPtr, std::string boardingTerminalCode, std::string destinationTerminalCode);
 };
 
 class Transport
