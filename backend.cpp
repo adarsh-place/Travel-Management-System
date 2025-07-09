@@ -15,6 +15,9 @@ std::vector<Flight *> allFlightsList;
 std::vector<Terminal *> allStationsList;
 std::vector<Terminal *> allAirportsList;
 
+FlightAdmin *flightAdmin = new FlightAdmin(flight_admin_email, flight_admin_password);
+TrainAdmin *trainAdmin = new TrainAdmin(train_admin_email, train_admin_password);
+
 int codeToTerminalPosition(std::vector<Terminal *> &terminalList, std::string &code)
 {
     int pos = 0;
@@ -268,6 +271,7 @@ Admin::Admin(std::string email, std::string passsword)
 void Admin::adminLoginPanel()
 {
     std::vector<std::string> inputs = printLoginPanel("Admin");
+    printAlert(inputs[0] + " " + inputs[1] + " " + this->email + " " + this->password);
     if (inputs[0] == this->email && inputs[1] == this->password)
     {
         printAlert("Logged In Successfully");
@@ -662,7 +666,7 @@ void FlightAdmin::addNewTransport()
         std::vector<std::string> cityTimes = stringToVectorString(departureTimes);
         if (cityTimes.size() != citiesCount)
         {
-            printAlert("Failed to add Flight.\nNo. of departure times provided does not match cities count");
+            printAlert("Failed to add Flight.\nNo. of departure times provided does not match cities count.");
             return;
         }
 
@@ -880,7 +884,7 @@ void UserManager::userLoginPanel()
 }
 void UserManager::userDashboard()
 {
-    printUserDashboard();
+    printUserDashboard(this->loggedInUser->fullName);
     char choice = inputUserChoice();
     switch (choice)
     {
@@ -1040,7 +1044,7 @@ void UserManager::ticketBookingPanel(std::string transport)
             int trainChoice = inputNumber("Enter Train Choice: ");
             if (trainChoice < 0 || trainChoice > filteredTrainsPosition.size())
             {
-                printAlert("Invalid Choice.");
+                printAlert("Booking Failed.\nInvalid Choice.");
             }
             else
             {
@@ -1053,7 +1057,7 @@ void UserManager::ticketBookingPanel(std::string transport)
                 int seatChoice = inputNumber();
                 if (seatChoice < 0 || seatChoice > 5)
                 {
-                    printAlert("Booking Failed!\nInvalid Choice");
+                    printContinue("Invalid Choice");
                     goto trainSeatSelectionCheckPoint;
                 }
                 else if (seatChoice == 5)
@@ -1095,7 +1099,7 @@ void UserManager::ticketBookingPanel(std::string transport)
             int flightChoice = inputNumber("Enter Flight Choice: ");
             if (flightChoice < 0 || flightChoice > filteredFlightsPosition.size())
             {
-                printAlert("Invalid Choice.");
+                printAlert("Booking Failed.\nInvalid Choice.");
             }
             else
             {
@@ -1108,7 +1112,7 @@ void UserManager::ticketBookingPanel(std::string transport)
                 int seatChoice = inputNumber();
                 if (seatChoice < 0 || seatChoice > 3)
                 {
-                    printAlert("Booking Failed!\nInvalid Choice");
+                    printContinue("Invalid Choice");
                     goto flightSeatSelectionCheckPoint;
                 }
                 else if (seatChoice == 3)
@@ -1155,7 +1159,7 @@ void UserManager::cancelTicketPanel(std::string transport)
     }
     else
     {
-        int ticketChoice = inputNumber("Enter Choice number to cancel: ");
+        int ticketChoice = inputNumber("Enter choice number to cancel ticket: ");
         if (ticketChoice < 0 || ticketChoice > ticketsCt)
         {
             printAlert("Failed to cancel Ticket.\nInvalid Choice.");
@@ -1302,8 +1306,8 @@ Transport::Transport(std::string name, std::string number, ListNode *coveringCit
     this->bookedSeats.assign(totalSeats.size(), 0);
 }
 
-FlightAdmin flightAdmin(flight_admin_email, flight_admin_password);
-TrainAdmin trainAdmin(train_admin_email, train_admin_password);
+// FlightAdmin flightAdmin->flight_admin_email, flight_admin_password);
+// TrainAdmin trainAdmin->train_admin_email, train_admin_password);
 UserManager userManager;
 
 void loadDataFromFiles() {}
@@ -1343,12 +1347,12 @@ void ControlPanel()
         {
         case '1':
         {
-            flightAdmin.adminLoginPanel();
+            flightAdmin->adminLoginPanel();
             break;
         }
         case '2':
         {
-            trainAdmin.adminLoginPanel();
+            trainAdmin->adminLoginPanel();
             break;
         }
         case '3':

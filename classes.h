@@ -106,10 +106,13 @@ public:
     virtual void addNewTransport() = 0;
     virtual void removeTerminal() = 0;
     virtual void removeTransport() = 0;
+    void printPassword()
+    {
+        std::cout << this->email << " " << this->password << "\n";
+    }
 };
 class FlightAdmin : public Admin
 {
-private:
 public:
     FlightAdmin() {}
     FlightAdmin(std::string email, std::string password) : Admin(email, password) {}
@@ -121,7 +124,6 @@ public:
 };
 class TrainAdmin : public Admin
 {
-private:
 public:
     TrainAdmin() {}
     TrainAdmin(std::string email, std::string password) : Admin(email, password) {}

@@ -354,10 +354,10 @@ std::vector<std::string> printUserRegistrationPanel()
     std::vector<std::string> info = {iName, iEmail, iPassword, iConfirmPassword};
     return info;
 }
-void printUserDashboard()
+void printUserDashboard(std::string name)
 {
     system("cls");
-    std::cout << "Welcome User\n";
+    std::cout << "Welcome " << name << "\n";
     std::cout << "1. View trains and stations details\n";
     std::cout << "2. View flights and airports details\n";
     std::cout << "3. Book Ticket\n";
@@ -397,7 +397,7 @@ void printAllTrainTickets(std::vector<TrainTicket *> trainTickets)
         int count = 1;
         for (auto t : trainTickets)
         {
-            std::cout << "==========================================================";
+            std::cout << "==========================================================\n";
             std::cout << count << "\n";
             std::cout << "Booking Date: " << t->bookingDate->getDateTime() << "\n";
             std::cout << "Train name: " << t->trainPtr->name << "\n";
@@ -408,7 +408,7 @@ void printAllTrainTickets(std::vector<TrainTicket *> trainTickets)
             std::cout << "Booking Price: " << t->price << "\n";
             count++;
         }
-        std::cout << "==========================================================";
+        std::cout << "==========================================================\n";
     }
 }
 void printAllFlightTickets(std::vector<FlightTicket *> flightTickets)
@@ -425,7 +425,7 @@ void printAllFlightTickets(std::vector<FlightTicket *> flightTickets)
         int count = 1;
         for (auto t : flightTickets)
         {
-            std::cout << "==========================================================";
+            std::cout << "==========================================================\n";
             std::cout << count << "\n";
             std::cout << "Booking Date: " << t->bookingDate->getDateTime() << "\n";
             std::cout << "Flight name: " << t->flightPtr->name << "\n";
@@ -436,7 +436,7 @@ void printAllFlightTickets(std::vector<FlightTicket *> flightTickets)
             std::cout << "Booking Price: " << t->price << "\n";
             count++;
         }
-        std::cout << "==========================================================";
+        std::cout << "==========================================================\n";
     }
 }
 
