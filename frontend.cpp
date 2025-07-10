@@ -60,6 +60,37 @@ void printLandingPanel()
     std::cout << "6. Quit \n";
 }
 
+void printInCenter(std::string str, int spaceSize)
+{
+}
+
+void printTrainDetails(int count, Train *train)
+{
+    std::cout << "\n===========================================================================\n\n";
+    std::cout << count << ". " << train->name << " (" << train->number << ")\n";
+    std::cout << "\n";
+    std::cout << "Covering Stations: \n";
+    ListNode *tempNode = train->coveringCities;
+    int cityCount = 1;
+    while (tempNode != NULL)
+    {
+        std::cout << "\t" << cityCount << ") "
+                  << tempNode->currentTerminal.name << " (" << tempNode->currentTerminal.code << "), " << tempNode->currentTerminal.city
+                  << " : " << tempNode->departureTime.getDateTime() << "\n";
+        std::cout << "\t|\n";
+        tempNode = tempNode->next;
+        cityCount++;
+    }
+    std::cout << "\n";
+    std::cout << " -----------------------------------------------------------\n";
+    std::cout << "|   Seat Type   |   Price   | Total Seats(Available Seats)  |\n";
+    std::cout << "|-----------------------------------------------------------|\n";
+    std::cout << "|    1st AC     |  Rs.4000  |            " << train->totalSeats[3] << "(" << train->totalSeats[3] - train->bookedSeats[3] << ")" << "             |\n";
+    std::cout << "|    2nd AC     |  Rs.3000  |            " << train->totalSeats[2] << "(" << train->totalSeats[2] - train->bookedSeats[2] << ")" << "             |\n";
+    std::cout << "|    3rd AC     |  Rs.2000  |            " << train->totalSeats[1] << "(" << train->totalSeats[1] - train->bookedSeats[1] << ")" << "             |\n";
+    std::cout << "| Sleeper Class |  Rs.1000  |            " << train->totalSeats[0] << "(" << train->totalSeats[0] - train->bookedSeats[0] << ")" << "             |\n";
+    std::cout << " -----------------------------------------------------------\n";
+}
 void printAllTrains(std::vector<Train *> allTrainsList, std::vector<int> positions = {})
 {
     system("cls");
@@ -78,26 +109,37 @@ void printAllTrains(std::vector<Train *> allTrainsList, std::vector<int> positio
     {
         for (auto train : allTrainsList)
         {
-            std::cout << "=====================================\n";
-            std::cout << count << "\n";
-            std::cout << "Train Name: " << train->name << "\n";
-            std::cout << "Train Number: " << train->number << "\n";
+            printTrainDetails(count, train);
             count++;
         }
-        std::cout << "=====================================\n";
     }
     else
     {
         for (int index : positions)
         {
-            std::cout << "=====================================\n";
-            std::cout << count << "\n";
-            std::cout << "Train Name: " << allTrainsList[index]->name << "\n";
-            std::cout << "Train Number: " << allTrainsList[index]->number << "\n";
+            printTrainDetails(count, allTrainsList[index]);
             count++;
         }
-        std::cout << "=====================================\n";
     }
+    std::cout << "\n===========================================================================\n";
+}
+void printFlightDetails(int count, Flight *flight)
+{
+    std::cout << "\n===========================================================================\n\n";
+    std::cout << count << ". " << flight->name << " (" << flight->number << ")\n";
+
+    ListNode *tempNode = flight->coveringCities;
+    std::cout << "\n";
+    std::cout << "Boarding Airport: " << tempNode->currentTerminal.name << " (" << tempNode->currentTerminal.code << "), " << tempNode->currentTerminal.city << " : " << tempNode->departureTime.getDateTime() << "\n";
+    tempNode = tempNode->next;
+    std::cout << "Destination Airport: " << tempNode->currentTerminal.name << " (" << tempNode->currentTerminal.code << "), " << tempNode->currentTerminal.city << " : " << tempNode->departureTime.getDateTime() << "\n";
+    std::cout << "\n";
+    std::cout << " ------------------------------------------------------------\n";
+    std::cout << "|   Seat Type    |   Price   | Total Seats(Available Seats)  |\n";
+    std::cout << "|------------------------------------------------------------|\n";
+    std::cout << "| Economy Class  |  Rs.6000  |            " << flight->totalSeats[0] << "(" << flight->totalSeats[0] - flight->bookedSeats[0] << ")" << "             |\n";
+    std::cout << "| Business Class |  Rs.8000  |            " << flight->totalSeats[1] << "(" << flight->totalSeats[1] - flight->bookedSeats[1] << ")" << "             |\n";
+    std::cout << " ------------------------------------------------------------\n";
 }
 void printAllFlights(std::vector<Flight *> allFlightsList, std::vector<int> positions = {})
 {
@@ -117,26 +159,19 @@ void printAllFlights(std::vector<Flight *> allFlightsList, std::vector<int> posi
     {
         for (auto flight : allFlightsList)
         {
-            std::cout << "=====================================\n";
-            std::cout << count << "\n";
-            std::cout << "Filght Name: " << flight->name << "\n";
-            std::cout << "Flight Number: " << flight->number << "\n";
+            printFlightDetails(count, flight);
             count++;
         }
-        std::cout << "=====================================\n";
     }
     else
     {
         for (int index : positions)
         {
-            std::cout << "=====================================\n";
-            std::cout << count << "\n";
-            std::cout << "Filght Name: " << allFlightsList[index]->name << "\n";
-            std::cout << "Filght Number: " << allFlightsList[index]->number << "\n";
+            printFlightDetails(count, allFlightsList[index]);
             count++;
         }
-        std::cout << "=====================================\n";
     }
+    std::cout << "\n===========================================================================\n";
 }
 void printAllTerminals(std::string terminal, std::vector<Terminal *> allTerminals)
 {
@@ -298,7 +333,7 @@ void printAddNewTransportPanel(std::string transport, int &citiesCount, std::str
         getline(std::cin, coveringCitiesCode);
         std::cout << "Enter covering stations departure date and time (separated by space in DD/MM/YY-HH:MM format): \n ";
         getline(std::cin, departureTimes);
-        std::cout << "Enter number of seats in each of Unreserved, Sleeper Class, 3rd AC, 2nd AC and 1st AC (separated by space): \n ";
+        std::cout << "Enter number of seats in each of Sleeper Class, 3rd AC, 2nd AC and 1st AC (separated by space): \n ";
         getline(std::cin, totalSeats);
     }
     else
@@ -390,14 +425,18 @@ void printAllTrainTickets(std::vector<TrainTicket *> trainTickets)
 
     if (trainTickets.size() == 0)
     {
+        std::cout << "============================================================================\n";
         std::cout << "No tickets are Booked.";
+        std::cout << "============================================================================\n";
     }
     else
     {
         int count = 1;
         for (auto t : trainTickets)
         {
-            std::cout << "==========================================================\n";
+            std::cout << "\n";
+            std::cout << "============================================================================\n";
+            std::cout << "\n";
             std::cout << count << "\n";
             std::cout << "Booking Date: " << t->bookingDate->getDateTime() << "\n";
             std::cout << "Train name: " << t->trainPtr->name << "\n";
@@ -408,7 +447,8 @@ void printAllTrainTickets(std::vector<TrainTicket *> trainTickets)
             std::cout << "Booking Price: " << t->price << "\n";
             count++;
         }
-        std::cout << "==========================================================\n";
+        std::cout << "\n";
+        std::cout << "============================================================================\n";
     }
 }
 void printAllFlightTickets(std::vector<FlightTicket *> flightTickets)
@@ -418,14 +458,18 @@ void printAllFlightTickets(std::vector<FlightTicket *> flightTickets)
 
     if (flightTickets.size() == 0)
     {
+        std::cout << "============================================================================\n";
         std::cout << "No tickets are Booked.";
+        std::cout << "============================================================================\n";
     }
     else
     {
         int count = 1;
         for (auto t : flightTickets)
         {
-            std::cout << "==========================================================\n";
+            std::cout<<"\n";
+            std::cout << "============================================================================\n";
+            std::cout<<"\n";
             std::cout << count << "\n";
             std::cout << "Booking Date: " << t->bookingDate->getDateTime() << "\n";
             std::cout << "Flight name: " << t->flightPtr->name << "\n";
@@ -436,7 +480,8 @@ void printAllFlightTickets(std::vector<FlightTicket *> flightTickets)
             std::cout << "Booking Price: " << t->price << "\n";
             count++;
         }
-        std::cout << "==========================================================\n";
+        std::cout<<"\n";
+        std::cout << "============================================================================\n";
     }
 }
 

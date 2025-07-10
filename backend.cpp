@@ -257,10 +257,51 @@ DateTime *getCurrentDateTime()
     std::tm *localTime = std::localtime(&now);
 
     char buffer[80];
-    std::strftime(buffer, sizeof(buffer), "%d/%m/%y - %H:%M", localTime);
+    std::strftime(buffer, sizeof(buffer), "%d/%m/%y-%H:%M", localTime);
     std::string formattedDateTime = buffer;
 
     return stringToDateTime(formattedDateTime);
+}
+
+// DateTime struct
+bool DateTime::operator==(const DateTime &other) const
+{
+    return day == other.day && month == other.month && year == other.year &&
+           hour == other.hour && minute == other.minute;
+}
+bool DateTime::operator<(const DateTime &other) const
+{
+    if (year != other.year)
+        return year < other.year;
+    if (month != other.month)
+        return month < other.month;
+    if (day != other.day)
+        return day < other.day;
+    if (hour != other.hour)
+        return hour < other.hour;
+    return minute < other.minute;
+}
+bool DateTime::operator>(const DateTime &other) const
+{
+    return other < *this;
+}
+bool DateTime::operator<=(const DateTime &other) const
+{
+    return !(*this > other);
+}
+bool DateTime::operator>=(const DateTime &other) const
+{
+    return !(*this < other);
+}
+bool DateTime::operator!=(const DateTime &other) const
+{
+    return !(*this == other);
+}
+std::string DateTime::getDateTime()
+{
+    char buffer[20];
+    std::snprintf(buffer, sizeof(buffer), "%02d/%02d/%02d - %02d:%02d", this->day, this->month, this->year, this->hour, this->minute);
+    return std::string(buffer);
 }
 
 // Admin Class
@@ -457,7 +498,7 @@ void TrainAdmin::addNewTransport()
         std::vector<int> seatsInInt;
 
         // checking no. of seats in each class
-        if (seatsCt.size() != 5)
+        if (seatsCt.size() != 4)
         {
             printAlert("Failed to add Train.\nSeats provided does not match.");
             return;
@@ -1229,38 +1270,6 @@ void UserManager::changeUserName()
 }
 
 // CSVManager Class
-std::vector<std::vector<std::string>> CSVManager::readCSV(const std::string &filename)
-{
-    std::vector<std::vector<std::string>> data;
-    std::ifstream file(filename);
-    std::string line;
-    while (getline(file, line))
-    {
-        std::stringstream ss(line);
-        std::string cell;
-        std::vector<std::string> row;
-        while (getline(ss, cell, ','))
-        {
-            row.push_back(cell);
-        }
-        data.push_back(row);
-    }
-    return data;
-}
-void CSVManager::writeCSV(const std::string &filename, const std::vector<std::vector<std::string>> &data)
-{
-    std::ofstream file(filename);
-    for (const auto &row : data)
-    {
-        for (size_t i = 0; i < row.size(); ++i)
-        {
-            file << row[i];
-            if (i < row.size() - 1)
-                file << ",";
-        }
-        file << "\n";
-    }
-}
 
 // Terminal Class
 Terminal::Terminal(std::string name, std::string city, std::string code)

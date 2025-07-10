@@ -38,51 +38,18 @@ struct DateTime
     DateTime(int year, int month, int day, int hour, int minute) : year(year), month(month), day(day), hour(hour), minute(minute) {}
 
     // == operator
-    bool operator==(const DateTime &other) const
-    {
-        return day == other.day && month == other.month && year == other.year &&
-               hour == other.hour && minute == other.minute;
-    }
-
+    bool operator==(const DateTime &other) const;
     // < operator
-    bool operator<(const DateTime &other) const
-    {
-        if (year != other.year)
-            return year < other.year;
-        if (month != other.month)
-            return month < other.month;
-        if (day != other.day)
-            return day < other.day;
-        if (hour != other.hour)
-            return hour < other.hour;
-        return minute < other.minute;
-    }
-
+    bool operator<(const DateTime &other) const;
     // > operator
-    bool operator>(const DateTime &other) const
-    {
-        return other < *this;
-    }
-
+    bool operator>(const DateTime &other) const;
     // <= operator
-    bool operator<=(const DateTime &other) const
-    {
-        return !(*this > other);
-    }
-
+    bool operator<=(const DateTime &other) const;
     // >= operator
-    bool operator>=(const DateTime &other) const
-    {
-        return !(*this < other);
-    }
-
+    bool operator>=(const DateTime &other) const;
     // != operator
-    bool operator!=(const DateTime &other) const
-    {
-        return !(*this == other);
-    }
-
-    std::string getDateTime() { return ""; }
+    bool operator!=(const DateTime &other) const;
+    std::string getDateTime();
 };
 struct ListNode
 {
@@ -171,8 +138,7 @@ public:
 class CSVManager
 {
 public:
-    static std::vector<std::vector<std::string>> readCSV(const std::string &filename);
-    static void writeCSV(const std::string &filename, const std::vector<std::vector<std::string>> &data);
+    CSVManager() {}
 };
 
 class Ticket
