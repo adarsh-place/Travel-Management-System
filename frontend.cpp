@@ -58,7 +58,7 @@ std::string putInCenter(std::string str, int width = 78)
 
     return str;
 }
-std::string paddingLeft(std::string str, int padding, int width = 78)
+std::string putLeftPaddingAndFillRight(std::string str, int padding, int width = 78)
 {
     for (int i = 1; i <= padding; i++)
     {
@@ -68,13 +68,6 @@ std::string paddingLeft(std::string str, int padding, int width = 78)
     {
         str = str + " ";
     }
-    return str;
-}
-std::string getSpaces(int n)
-{
-    std::string str = "";
-    for (int i = 1; i <= n; i++)
-        str += " ";
     return str;
 }
 
@@ -102,13 +95,13 @@ void printTrainDetails(int count, Train *train)
     std::cout << "║" << putInCenter(std::to_string(count) + ". " + train->name + " (" + train->number + ")") << "║\n";
     std::cout << "║" << putInCenter("") << "║" << "\n";
 
-    std::cout << "║" << paddingLeft("Covering Stations: ", 4) << "║\n";
+    std::cout << "║" << putLeftPaddingAndFillRight("Covering Stations: ", 4) << "║\n";
 
     ListNode *tempNode = train->coveringCities;
     int cityCount = 1;
     while (tempNode != NULL)
     {
-        std::cout << "║" << paddingLeft("(" + std::to_string(cityCount) + ") " + tempNode->currentTerminal.name + " (" + tempNode->currentTerminal.code + "), " + tempNode->currentTerminal.city + " : " + tempNode->departureTime.rawDT, 8) << "║\n";
+        std::cout << "║" << putLeftPaddingAndFillRight("(" + std::to_string(cityCount) + ") " + tempNode->currentTerminal.name + " (" + tempNode->currentTerminal.code + "), " + tempNode->currentTerminal.city + " : " + tempNode->departureTime.rawDT, 8) << "║\n";
         tempNode = tempNode->next;
         cityCount++;
         if (tempNode != NULL)
@@ -120,10 +113,10 @@ void printTrainDetails(int count, Train *train)
     std::cout << "║       ┌────────────────┬────────────┬────────────────────────────────┐       ║\n";
     std::cout << "║       │   Seat Type    │    Price   │ Total Seats(Available Seats)   │       ║\n";
     std::cout << "║       ├────────────────┼────────────┼────────────────────────────────┤       ║\n";
-    std::cout << "║       │     1st AC     │  Rs. 4000  │" + paddingLeft(std::to_string(train->totalSeats[3]) + "(" + std::to_string(train->totalSeats[3] - train->bookedSeats[3]) + ")", 10, 32) << "│       ║\n";
-    std::cout << "║       │     2nd AC     │  Rs. 3000  │" + paddingLeft(std::to_string(train->totalSeats[2]) + "(" + std::to_string(train->totalSeats[2] - train->bookedSeats[2]) + ")", 10, 32) << "│       ║\n";
-    std::cout << "║       │     3rd AC     │  Rs. 2000  │" + paddingLeft(std::to_string(train->totalSeats[1]) + "(" + std::to_string(train->totalSeats[1] - train->bookedSeats[1]) + ")", 10, 32) << "│       ║\n";
-    std::cout << "║       │  Sleeper Class │  Rs. 1000  │" + paddingLeft(std::to_string(train->totalSeats[0]) + "(" + std::to_string(train->totalSeats[0] - train->bookedSeats[0]) + ")", 10, 32) << "│       ║\n";
+    std::cout << "║       │     1st AC     │  Rs. 4000  │" + putLeftPaddingAndFillRight(std::to_string(train->totalSeats[3]) + "(" + std::to_string(train->totalSeats[3] - train->bookedSeats[3]) + ")", 10, 32) << "│       ║\n";
+    std::cout << "║       │     2nd AC     │  Rs. 3000  │" + putLeftPaddingAndFillRight(std::to_string(train->totalSeats[2]) + "(" + std::to_string(train->totalSeats[2] - train->bookedSeats[2]) + ")", 10, 32) << "│       ║\n";
+    std::cout << "║       │     3rd AC     │  Rs. 2000  │" + putLeftPaddingAndFillRight(std::to_string(train->totalSeats[1]) + "(" + std::to_string(train->totalSeats[1] - train->bookedSeats[1]) + ")", 10, 32) << "│       ║\n";
+    std::cout << "║       │  Sleeper Class │  Rs. 1000  │" + putLeftPaddingAndFillRight(std::to_string(train->totalSeats[0]) + "(" + std::to_string(train->totalSeats[0] - train->bookedSeats[0]) + ")", 10, 32) << "│       ║\n";
     std::cout << "║       └────────────────┴────────────┴────────────────────────────────┘       ║\n";
 }
 void printAllTrains(std::vector<Train *> allTrainsList, std::vector<int> positions = {})
@@ -178,22 +171,23 @@ void printFlightDetails(int count, Flight *flight)
     std::cout << "║" << putInCenter("") << "║" << "\n";
 
     ListNode *tempNode = flight->coveringCities;
-    std::cout << "║" << paddingLeft("Boarding Airport: " + tempNode->currentTerminal.name + " (" + tempNode->currentTerminal.code + "), " + tempNode->currentTerminal.city, 4) << "║\n";
-    std::cout << "║" << paddingLeft("Boarding Date and Time: " + tempNode->departureTime.rawDT, 4) << "║\n";
+    std::cout << "║" << putLeftPaddingAndFillRight("Boarding Airport: " + tempNode->currentTerminal.name + " (" + tempNode->currentTerminal.code + "), " + tempNode->currentTerminal.city, 4) << "║\n";
+    std::cout << "║" << putLeftPaddingAndFillRight("Boarding Date and Time: " + tempNode->departureTime.rawDT, 4) << "║\n";
 
     std::cout << "║" << putInCenter("") << "║" << "\n";
 
     tempNode = tempNode->next;
-    std::cout << "║" << paddingLeft("Destination Airport: " + tempNode->currentTerminal.name + " (" + tempNode->currentTerminal.code + "), " + tempNode->currentTerminal.city, 4) << "║\n";
-    std::cout << "║" << paddingLeft("Arrival Date and Time: " + tempNode->departureTime.rawDT, 4) << "║\n";
+    std::cout << "║" << putLeftPaddingAndFillRight("Destination Airport: " + tempNode->currentTerminal.name + " (" + tempNode->currentTerminal.code + "), " + tempNode->currentTerminal.city, 4) << "║\n";
+    std::cout << "║" << putLeftPaddingAndFillRight("Arrival Date and Time: " + tempNode->departureTime.rawDT, 4) << "║\n";
 
     std::cout << "║" << putInCenter("") << "║" << "\n";
 
+    //                            16             12                   32
     std::cout << "║       ┌────────────────┬────────────┬────────────────────────────────┐       ║\n";
     std::cout << "║       │   Seat Type    │    Price   │ Total Seats(Available Seats)   │       ║\n";
     std::cout << "║       ├────────────────┼────────────┼────────────────────────────────┤       ║\n";
-    std::cout << "║       │ Economy Class  │  Rs. 6000  │" + paddingLeft(std::to_string(flight->totalSeats[0]) + "(" + std::to_string(flight->totalSeats[0] - flight->bookedSeats[0]) + ")", 10, 32) << "│       ║\n";
-    std::cout << "║       │ Business Class │  Rs. 8000  │" + paddingLeft(std::to_string(flight->totalSeats[1]) + "(" + std::to_string(flight->totalSeats[1] - flight->bookedSeats[1]) + ")", 10, 32) << "│       ║\n";
+    std::cout << "║       │ Economy Class  │  Rs. 6000  │" + putLeftPaddingAndFillRight(std::to_string(flight->totalSeats[0]) + "(" + std::to_string(flight->totalSeats[0] - flight->bookedSeats[0]) + ")", 10, 32) << "│       ║\n";
+    std::cout << "║       │ Business Class │  Rs. 8000  │" + putLeftPaddingAndFillRight(std::to_string(flight->totalSeats[1]) + "(" + std::to_string(flight->totalSeats[1] - flight->bookedSeats[1]) + ")", 10, 32) << "│       ║\n";
     std::cout << "║       └────────────────┴────────────┴────────────────────────────────┘       ║\n";
 }
 void printAllFlights(std::vector<Flight *> allFlightsList, std::vector<int> positions = {})
@@ -244,28 +238,30 @@ void printAllFlights(std::vector<Flight *> allFlightsList, std::vector<int> posi
 void printAllTerminals(std::string terminal, std::vector<Terminal *> allTerminals)
 {
     system("cls");
-    std::cout << "All " << terminal << "s\n";
+    std::cout << "╔══════════════════════════════════════════════════════════════════════════════╗" << "\n";
+    std::cout << "║" << putInCenter("All " + terminal + "s List") << "║" << "\n";
+    std::cout << "╠══════════════════════════════════════════════════════════════════════════════╣" << "\n";
 
     if (allTerminals.size() == 0)
     {
-        std::cout << "=====================================\n";
-        std::cout << "No " + terminal + " are present.\n";
-        std::cout << "=====================================\n";
+        std::cout << "║" << putInCenter("") << "║" << "\n";
+        std::cout << "║" << putInCenter("No " + terminal + "s are present.") << "║" << "\n";
+        std::cout << "║" << putInCenter("") << "║" << "\n";
     }
     else
     {
-        int count = 1;
+        //                                  28                        22              12
+        std::cout << "║      ┌────────────────────────────┬──────────────────────┬────────────┐      ║\n";
+        std::cout << "║      │            Name            │         City         │    Code    │      ║\n";
+        std::cout << "║      ├────────────────────────────┼──────────────────────┼────────────┤      ║\n";
         for (auto t : allTerminals)
         {
-            std::cout << "=====================================\n";
-            std::cout << count << "\n";
-            std::cout << terminal << " Name: " << t->name << "\n";
-            std::cout << "City: " << t->city << "\n";
-            std::cout << terminal << " Code: " << t->code << "\n";
-            count++;
+            std::cout << "║      │" << putInCenter(t->name, 28) << "│" << putInCenter(t->city, 22) << "│" << putInCenter(t->code, 12) << "│      ║\n";
         }
-        std::cout << "=====================================\n";
+        std::cout << "║      └────────────────────────────┴──────────────────────┴────────────┘      ║\n";
     }
+    std::cout << "║" << putInCenter("") << "║" << "\n";
+    std::cout << "╚══════════════════════════════════════════════════════════════════════════════╝" << "\n";
 }
 void printTransportOrTerminalSelectionPanel(std::string transport, std::string terminal, std::vector<Train *> &allTrainsList,
                                             std::vector<Flight *> &allFlightsList, std::vector<Terminal *> &terminalsList)
