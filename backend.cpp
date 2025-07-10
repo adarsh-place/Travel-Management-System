@@ -129,49 +129,27 @@ bool isLeapYear(int year)
 {
     return (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
 }
-DateTime *stringToDateTime(std::string &str, int sz = 14)
+DateTime *stringToDateTime(std::string &str)
 {
     int day, month, year, hour, minute;
-    if (sz == 8)
+
+    if (str.size() != 14 || str[2] != '/' || str[5] != '/' || str[8] != '-' || str[11] != ':')
+        return NULL;
+
+    for (int i = 0; i < 14; i++)
     {
-        if (str.size() != 8 || str[2] != '/' || str[5] != '/')
-            return NULL;
-
-        for (int i = 0; i < 8; i++)
+        if (i != 2 && i != 5 && i != 8 && i != 11)
         {
-            if (i != 2 && i != 5)
-            {
-                if (str[i] < '0' || str[i] > '9')
-                    return NULL;
-            }
+            if (str[i] < '0' || str[i] > '9')
+                return NULL;
         }
-
-        day = stoi(str.substr(0, 2));
-        month = stoi(str.substr(3, 2));
-        year = stoi(str.substr(6, 2));
-        hour = 0;
-        minute = 0;
     }
-    else
-    {
-        if (str.size() != 14 || str[2] != '/' || str[5] != '/' || str[8] != '-' || str[11] != ':')
-            return NULL;
 
-        for (int i = 0; i < 14; i++)
-        {
-            if (i != 2 && i != 5 && i != 8 && i != 11)
-            {
-                if (str[i] < '0' || str[i] > '9')
-                    return NULL;
-            }
-        }
-
-        day = stoi(str.substr(0, 2));
-        month = stoi(str.substr(3, 2));
-        year = stoi(str.substr(6, 2));
-        hour = stoi(str.substr(9, 2));
-        minute = stoi(str.substr(12, 2));
-    }
+    day = stoi(str.substr(0, 2));
+    month = stoi(str.substr(3, 2));
+    year = stoi(str.substr(6, 2));
+    hour = stoi(str.substr(9, 2));
+    minute = stoi(str.substr(12, 2));
 
     if (day < 0 || month < 0 || year < 0 || month > 12 || hour < 0 || hour > 23 || minute < 0 || minute > 59)
         return NULL;
@@ -189,7 +167,7 @@ DateTime *stringToDateTime(std::string &str, int sz = 14)
     else if (daysInMonth[month - 1] < day)
         return NULL;
 
-    return new DateTime(year, month, day, hour, minute);
+    return new DateTime(str, year, month, day, hour, minute);
 }
 bool isOnlyDigits(std::string &str)
 {
@@ -297,12 +275,6 @@ bool DateTime::operator!=(const DateTime &other) const
 {
     return !(*this == other);
 }
-std::string DateTime::getDateTime()
-{
-    char buffer[20];
-    std::snprintf(buffer, sizeof(buffer), "%02d/%02d/%02d - %02d:%02d", this->day, this->month, this->year, this->hour, this->minute);
-    return std::string(buffer);
-}
 
 // Admin Class
 Admin::Admin(std::string email, std::string passsword)
@@ -313,7 +285,6 @@ Admin::Admin(std::string email, std::string passsword)
 void Admin::adminLoginPanel()
 {
     std::vector<std::string> inputs = printLoginPanel("Admin");
-    printAlert(inputs[0] + " " + inputs[1] + " " + this->email + " " + this->password);
     if (inputs[0] == this->email && inputs[1] == this->password)
     {
         printAlert("Logged In Successfully");
@@ -1052,7 +1023,8 @@ void UserManager::userDashboard()
 void UserManager::ticketBookingPanel(std::string transport)
 {
     std::vector<std::string> inputs = printTicketBookingPanel(transport);
-    DateTime *journeyDate = stringToDateTime(inputs[2], 8);
+    inputs[2] += "00:00";
+    DateTime *journeyDate = stringToDateTime(inputs[2]);
     if (journeyDate == NULL)
     {
         printAlert("Booking Failed\nInvalid Journey Date");

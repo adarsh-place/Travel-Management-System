@@ -34,8 +34,9 @@ struct DateTime
     int day;
     int hour;
     int minute;
+    std::string rawDT;
     DateTime() {}
-    DateTime(int year, int month, int day, int hour, int minute) : year(year), month(month), day(day), hour(hour), minute(minute) {}
+    DateTime(std::string rawDT, int year, int month, int day, int hour, int minute) : rawDT(rawDT), year(year), month(month), day(day), hour(hour), minute(minute) {}
 
     // == operator
     bool operator==(const DateTime &other) const;
@@ -49,7 +50,6 @@ struct DateTime
     bool operator>=(const DateTime &other) const;
     // != operator
     bool operator!=(const DateTime &other) const;
-    std::string getDateTime();
 };
 struct ListNode
 {

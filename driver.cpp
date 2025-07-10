@@ -4,7 +4,9 @@ int main()
 {
     std::cout << "\x1b[32m";
 
-    // set for random
+    system("chcp 65001");
+    
+    // seed for random
     srand(static_cast<unsigned int>(std::time(0)));
 
     // loadDataFromFiles();
