@@ -147,23 +147,25 @@ public:
     DateTime *bookingDate;
     Terminal *boardingTerminal;
     Terminal *destinationTerminal;
+    std::string pnr;
     int seatChoice;
-    int price = 0;
     Ticket() {}
 };
 class FlightTicket : public Ticket
 {
 public:
     Flight *flightPtr;
+    int price = 0;
     FlightTicket() {}
-    FlightTicket(int seatChoice, Flight *flightPtr, std::string boardingTerminalCode, std::string destinationTerminalCode);
+    FlightTicket(int seatChoice, Flight *flightPtr, std::string boardingTerminalCode, std::string destinationTerminalCode,std::string pnr);
 };
 class TrainTicket : public Ticket
 {
 public:
     Train *trainPtr;
+    int price = 0;
     TrainTicket() {}
-    TrainTicket(int seatChoice, Train *trainPtr, std::string boardingTerminalCode, std::string destinationTerminalCode);
+    TrainTicket(int seatChoice, Train *trainPtr, std::string boardingTerminalCode, std::string destinationTerminalCode,std::string pnr);
 };
 
 class Transport

@@ -292,7 +292,7 @@ void Admin::adminLoginPanel()
     }
     else
     {
-        printAlert("Login Failed.\nInvalid Credentials");
+        printAlert("Login Failed.\n  Invalid Credentials");
     }
 }
 
@@ -996,17 +996,17 @@ void UserManager::userDashboard()
         }
         break;
     }
-    case '6':
-    {
-        this->changeUserPassword();
-        break;
-    }
-    case '7':
+    case 'a':
     {
         this->changeUserName();
         break;
     }
-    case '8':
+    case 'b':
+    {
+        this->changeUserPassword();
+        break;
+    }
+    case 'c':
     {
         loggedInUser = NULL;
         printAlert("Logged Out Successfully");
@@ -1023,7 +1023,7 @@ void UserManager::userDashboard()
 void UserManager::ticketBookingPanel(std::string transport)
 {
     std::vector<std::string> inputs = printTicketBookingPanel(transport);
-    inputs[2] += "00:00";
+    inputs[2] += "-00:00";
     DateTime *journeyDate = stringToDateTime(inputs[2]);
     if (journeyDate == NULL)
     {
@@ -1083,7 +1083,7 @@ void UserManager::ticketBookingPanel(std::string transport)
                     if (choosenTrain->totalSeats[seatChoice] > choosenTrain->bookedSeats[seatChoice])
                     {
                         std::string pnr = generateTrainTicketPNR();
-                        loggedInUser->trainTickets.push_back(new TrainTicket(seatChoice, choosenTrain, inputs[0], inputs[1]));
+                        loggedInUser->trainTickets.push_back(new TrainTicket(seatChoice, choosenTrain, inputs[0], inputs[1], pnr));
                         choosenTrain->bookedSeats[seatChoice]++;
                         // write in file;
                         printAlert("Seat Booked Successfully.");
@@ -1138,7 +1138,7 @@ void UserManager::ticketBookingPanel(std::string transport)
                     if (choosenFlight->totalSeats[seatChoice] > choosenFlight->bookedSeats[seatChoice])
                     {
                         std::string pnr = generateFlightTicketPNR();
-                        loggedInUser->flightTickets.push_back(new FlightTicket(seatChoice, choosenFlight, inputs[0], inputs[1]));
+                        loggedInUser->flightTickets.push_back(new FlightTicket(seatChoice, choosenFlight, inputs[0], inputs[1], pnr));
                         choosenFlight->bookedSeats[seatChoice]++;
                         // write in file;
                         printAlert("Seat Booked Successfully.");
@@ -1187,7 +1187,9 @@ void UserManager::cancelTicketPanel(std::string transport)
                 // increment seats in train
                 (*allTrainTickets)[ticketChoice]->trainPtr->bookedSeats[seatChoice]--;
                 // delete ticket from allTrainTickets;
+                TrainTicket *tT = (*allTrainTickets)[ticketChoice];
                 (*allTrainTickets).erase((*allTrainTickets).begin() + ticketChoice);
+                delete (tT);
             }
             else
             {
@@ -1196,7 +1198,9 @@ void UserManager::cancelTicketPanel(std::string transport)
                 // increment seats in flight
                 (*allFlightTickets)[ticketChoice]->flightPtr->bookedSeats[seatChoice]--;
                 // delete ticket from allFlightTickets;
+                FlightTicket *fT = (*allFlightTickets)[ticketChoice];
                 (*allFlightTickets).erase((*allFlightTickets).begin() + ticketChoice);
+                delete (fT);
             }
             printAlert("Ticket Canceled Successfully.");
         }
@@ -1254,10 +1258,11 @@ Terminal::Terminal(std::string name, std::string city, std::string code)
 // Ticket Class
 
 // FlightTicket Class
-FlightTicket::FlightTicket(int seatChoice, Flight *flightPtr, std::string boardingTerminalCode, std::string destinationTerminalCode)
+FlightTicket::FlightTicket(int seatChoice, Flight *flightPtr, std::string boardingTerminalCode, std::string destinationTerminalCode, std::string pnr)
     : flightPtr(flightPtr)
 {
     this->seatChoice = seatChoice;
+    this->pnr = pnr;
     int board = codeToTerminalPosition(allAirportsList, boardingTerminalCode);
     int dest = codeToTerminalPosition(allAirportsList, destinationTerminalCode);
     this->boardingTerminal = allAirportsList[board];
@@ -1266,10 +1271,11 @@ FlightTicket::FlightTicket(int seatChoice, Flight *flightPtr, std::string boardi
 }
 
 // TrainTicket Class
-TrainTicket::TrainTicket(int seatChoice, Train *trainPtr, std::string boardingTerminalCode, std::string destinationTerminalCode)
+TrainTicket::TrainTicket(int seatChoice, Train *trainPtr, std::string boardingTerminalCode, std::string destinationTerminalCode, std::string pnr)
     : trainPtr(trainPtr)
 {
     this->seatChoice = seatChoice;
+    this->pnr = pnr;
     int board = codeToTerminalPosition(allStationsList, boardingTerminalCode);
     int dest = codeToTerminalPosition(allStationsList, destinationTerminalCode);
     this->boardingTerminal = allStationsList[board];
@@ -1290,6 +1296,7 @@ Transport::Transport(std::string name, std::string number, ListNode *coveringCit
 void loadDataFromFiles() {}
 // void saveData(){}
 
+// Landing Screen Manager
 void ControlPanel()
 {
     printLandingPanel();
@@ -1356,4 +1363,27 @@ void ControlPanel()
     }
     }
     ControlPanel();
+}
+
+// free the allocated space in memory
+void cleanMemory()
+{
+    for (auto t : allStationsList)
+        delete (t);
+    for (auto t : allAirportsList)
+        delete (t);
+    for (auto t : allTrainsList)
+        delete (t);
+    for (auto t : allFlightsList)
+        delete (t);
+
+    // delete all listnode pointers in train
+    // delete all users pointers in unsermanager
+    // delete all tickets pointers of each user
+
+    delete (flightAdmin);
+    delete (trainAdmin);
+    delete (userManager);
+
+    std::cout << "\nDone\n";
 }
