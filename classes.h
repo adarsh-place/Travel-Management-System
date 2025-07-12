@@ -54,8 +54,8 @@ struct DateTime
 struct ListNode
 {
     Terminal currentTerminal;
-    ListNode *next;
     DateTime departureTime;
+    ListNode *next;
 };
 
 class Admin
@@ -76,25 +76,29 @@ public:
 };
 class FlightAdmin : public Admin
 {
+private:
+    void adminDashboard();
+    void addNewTerminal();
+    void addNewTransport();
+    void removeTerminal();
+    void removeTransport();
+
 public:
     FlightAdmin() {}
     FlightAdmin(std::string email, std::string password) : Admin(email, password) {}
-    void adminDashboard();
-    void addNewTerminal();
-    void addNewTransport();
-    void removeTerminal();
-    void removeTransport();
 };
 class TrainAdmin : public Admin
 {
-public:
-    TrainAdmin() {}
-    TrainAdmin(std::string email, std::string password) : Admin(email, password) {}
+private:
     void adminDashboard();
     void addNewTerminal();
     void addNewTransport();
     void removeTerminal();
     void removeTransport();
+
+public:
+    TrainAdmin() {}
+    TrainAdmin(std::string email, std::string password) : Admin(email, password) {}
 };
 
 class User
@@ -119,20 +123,18 @@ private:
     std::vector<User *> usersList;
     User *loggedInUser;
 
-public:
-    UserManager();
-
     bool isEmailRegistered(std::string email);
     User *findUser(std::string email);
-
-    void userRegistrationPanel();
-    void userLoginPanel();
-
     void userDashboard();
     void ticketBookingPanel(std::string transport);
     void cancelTicketPanel(std::string transport);
     void changeUserPassword();
     void changeUserName();
+
+public:
+    UserManager();
+    void userRegistrationPanel();
+    void userLoginPanel();
 };
 
 class CSVManager
@@ -157,7 +159,7 @@ public:
     Flight *flightPtr;
     int price = 0;
     FlightTicket() {}
-    FlightTicket(int seatChoice, Flight *flightPtr, std::string boardingTerminalCode, std::string destinationTerminalCode,std::string pnr);
+    FlightTicket(int seatChoice, Flight *flightPtr, std::string boardingTerminalCode, std::string destinationTerminalCode, std::string pnr);
 };
 class TrainTicket : public Ticket
 {
@@ -165,7 +167,7 @@ public:
     Train *trainPtr;
     int price = 0;
     TrainTicket() {}
-    TrainTicket(int seatChoice, Train *trainPtr, std::string boardingTerminalCode, std::string destinationTerminalCode,std::string pnr);
+    TrainTicket(int seatChoice, Train *trainPtr, std::string boardingTerminalCode, std::string destinationTerminalCode, std::string pnr);
 };
 
 class Transport
