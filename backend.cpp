@@ -418,6 +418,7 @@ void TrainAdmin::addNewTerminal()
     {
         allStationsList.push_back(new Terminal(name, city, code));
         // writing into file
+        csvManager->saveAllStations();
         success = true;
     }
 
@@ -566,6 +567,7 @@ void TrainAdmin::removeTerminal()
         {
             allStationsList.erase(allStationsList.begin() + stationPosition);
             // delete from file
+            csvManager->saveAllStations();
             success = true;
         }
         else
@@ -710,6 +712,7 @@ void FlightAdmin::addNewTerminal()
     {
         allAirportsList.push_back(new Terminal(name, city, code));
         // writing into file
+        csvManager->saveAllAirports();
         success = true;
     }
 
@@ -864,6 +867,8 @@ void FlightAdmin::removeTerminal()
         {
             allAirportsList.erase(allAirportsList.begin() + airportPosition);
             // delete from file
+            csvManager->saveAllAirports();
+            success = true;
         }
         else
         {
@@ -873,11 +878,11 @@ void FlightAdmin::removeTerminal()
 
     if (success)
     {
-        printAlert("Failed to remove Airport.\n" + message);
+        printAlert("Airport removed successfully");
     }
     else
     {
-        printAlert("Airport removed successfully");
+        printAlert("Failed to remove Airport.\n" + message);
     }
 }
 void FlightAdmin::removeTransport()
@@ -901,6 +906,7 @@ void FlightAdmin::removeTransport()
         {
             allFlightsList.erase(allFlightsList.begin() + flightPosition);
             // writing into file
+            success = true;
         }
         else
         {
@@ -1374,62 +1380,6 @@ void UserManager::changeUserName()
     printAlert(message);
 }
 
-// CSVManager Class
-void CSVManager ::loadUsersFromCSV()
-{
-    std::ifstream file("data/users.csv");
-
-    if (!file.is_open())
-    {
-        std::cerr << "Error opening file for reading.\n";
-        return;
-    }
-
-    std::string line;
-    bool isHeader = true;
-
-    while (std::getline(file, line))
-    {
-        if (isHeader)
-        {
-            isHeader = false;
-            continue;
-        }
-
-        std::stringstream ss(line);
-        std::string fullName, email, password;
-
-        if (std::getline(ss, fullName, ',') &&
-            std::getline(ss, email, ',') &&
-            std::getline(ss, password, ','))
-        {
-            allUsersList.push_back(new User(fullName, email, password));
-        }
-    }
-
-    file.close();
-}
-void CSVManager ::saveUsersToCSV()
-{
-    std::ofstream file("data/users.csv");
-
-    if (!file.is_open())
-    {
-        std::cerr << "Error opening file for writing.\n";
-        return;
-    }
-
-    // Optional header
-    file << "fullName,email,password\n";
-
-    for (const auto &user : allUsersList)
-    {
-        file << user->fullName << "," << user->email << "," << user->getPassword() << "\n";
-    }
-
-    file.close();
-}
-
 // Terminal Class
 Terminal::Terminal(std::string name, std::string city, std::string code)
 {
@@ -1476,9 +1426,175 @@ Transport::Transport(std::string name, std::string number, ListNode *coveringCit
     this->bookedSeats.assign(totalSeats.size(), 0);
 }
 
+// CSVManager Class
+void CSVManager ::loadUsersFromCSV()
+{
+    std::ifstream file("data/users.csv");
+
+    if (!file.is_open())
+    {
+        std::cerr << "Error opening users file for reading.\n";
+        return;
+    }
+
+    std::string line;
+    bool isHeader = true;
+
+    while (std::getline(file, line))
+    {
+        if (isHeader)
+        {
+            isHeader = false;
+            continue;
+        }
+
+        std::stringstream ss(line);
+        std::string fullName, email, password;
+
+        if (std::getline(ss, fullName, ',') &&
+            std::getline(ss, email, ',') &&
+            std::getline(ss, password, ','))
+        {
+            allUsersList.push_back(new User(fullName, email, password));
+        }
+    }
+
+    file.close();
+}
+void CSVManager ::saveUsersToCSV()
+{
+    std::ofstream file("data/users.csv");
+
+    if (!file.is_open())
+    {
+        std::cerr << "Error opening users file for writing.\n";
+        return;
+    }
+
+    // Optional header
+    file << "Full Name,Email,Password\n";
+
+    for (const auto &user : allUsersList)
+    {
+        file << user->fullName << "," << user->email << "," << user->getPassword() << "\n";
+    }
+
+    file.close();
+}
+void CSVManager ::loadAllStations()
+{
+    std::ifstream file("data/stations.csv");
+
+    if (!file.is_open())
+    {
+        std::cerr << "Error opening stations file for reading.\n";
+        return;
+    }
+
+    std::string line;
+    bool isHeader = true;
+
+    while (std::getline(file, line))
+    {
+        if (isHeader)
+        {
+            isHeader = false;
+            continue;
+        }
+
+        std::stringstream ss(line);
+        std::string code, name, city;
+
+        if (std::getline(ss, code, ',') &&
+            std::getline(ss, name, ',') &&
+            std::getline(ss, city, ','))
+        {
+            allStationsList.push_back(new Terminal(name, city, code));
+        }
+    }
+
+    file.close();
+}
+void CSVManager ::saveAllStations()
+{
+    std::ofstream file("data/stations.csv");
+
+    if (!file.is_open())
+    {
+        std::cerr << "Error opening stations file for writing.\n";
+        return;
+    }
+
+    // Optional header
+    file << "Code,Name,City\n";
+
+    for (const auto &station : allStationsList)
+    {
+        file << station->code << "," << station->name << "," << station->city << "\n";
+    }
+
+    file.close();
+}
+void CSVManager ::loadAllAirports()
+{
+    std::ifstream file("data/airports.csv");
+
+    if (!file.is_open())
+    {
+        std::cerr << "Error opening airports file for reading.\n";
+        return;
+    }
+
+    std::string line;
+    bool isHeader = true;
+
+    while (std::getline(file, line))
+    {
+        if (isHeader)
+        {
+            isHeader = false;
+            continue;
+        }
+
+        std::stringstream ss(line);
+        std::string code, name, city;
+
+        if (std::getline(ss, code, ',') &&
+            std::getline(ss, name, ',') &&
+            std::getline(ss, city, ','))
+        {
+            allAirportsList.push_back(new Terminal(name,city, code));
+        }
+    }
+
+    file.close();
+}
+void CSVManager ::saveAllAirports()
+{
+    std::ofstream file("data/airports.csv");
+
+    if (!file.is_open())
+    {
+        std::cerr << "Error opening airports file for writing.\n";
+        return;
+    }
+
+    // Optional header
+    file << "Code,Name,City\n";
+
+    for (const auto &airport : allAirportsList)
+    {
+        file << airport->code << "," << airport->name << "," << airport->city << "\n";
+    }
+
+    file.close();
+}
+
 void loadDataFromFiles()
 {
     csvManager->loadUsersFromCSV();
+    csvManager->loadAllStations();
+    csvManager->loadAllAirports();
 }
 // void saveData(){}
 

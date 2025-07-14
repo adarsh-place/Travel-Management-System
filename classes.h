@@ -142,6 +142,12 @@ public:
     CSVManager() {}
     void loadUsersFromCSV();
     void saveUsersToCSV();
+
+    void loadAllStations();
+    void saveAllStations();
+    
+    void loadAllAirports();
+    void saveAllAirports();
 };
 
 class Ticket
