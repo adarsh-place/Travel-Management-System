@@ -19,12 +19,12 @@ FlightAdmin *flightAdmin = new FlightAdmin(flight_admin_email, flight_admin_pass
 TrainAdmin *trainAdmin = new TrainAdmin(train_admin_email, train_admin_password);
 UserManager *userManager = new UserManager();
 
-int codeToTerminalPosition(std::vector<Terminal *> &terminalList, std::string &code)
+int cityCodeToTerminalPosition(std::vector<Terminal *> &terminalList, std::string &cityCode)
 {
     int pos = 0;
     for (Terminal *t : terminalList)
     {
-        if (t->code == code)
+        if (t->code == cityCode)
             return pos;
         pos++;
     }
@@ -169,35 +169,65 @@ DateTime *stringToDateTime(std::string &str)
 
     return new DateTime(str, year, month, day, hour, minute);
 }
-bool isOnlyDigits(std::string &str)
+bool isOnlyDigits(std::string &str, std::string extraChars = "")
 {
     for (char ch : str)
     {
         if (!isdigit(ch))
         {
-            return false;
+            bool find = false;
+            for (char extra : extraChars)
+            {
+                if (extra == ch)
+                {
+                    find = true;
+                    break;
+                }
+            }
+            if (!find)
+                return false;
         }
     }
     return true;
 }
-bool isOnlyAlphas(std::string &str)
+bool isOnlyAlphas(std::string &str, std::string extraChars = "")
 {
     for (char ch : str)
     {
         if (!isalpha(ch))
         {
-            return false;
+            bool find = false;
+            for (char extra : extraChars)
+            {
+                if (extra == ch)
+                {
+                    find = true;
+                    break;
+                }
+            }
+            if (!find)
+                return false;
         }
     }
     return true;
 }
-bool isOnlyDigitOrAlpha(std::string &str)
+bool isOnlyDigitOrAlpha(std::string &str, std::string extraChars = "")
 {
     for (char ch : str)
     {
         if (!isalnum(ch))
         {
-            return false;
+            bool find = false;
+            for (char extra : extraChars)
+            {
+                if (extra == ch)
+                {
+                    find = true;
+                    break;
+                }
+            }
+            if (!find)
+                return false;
         }
     }
     return true;
@@ -345,46 +375,58 @@ void TrainAdmin::addNewTerminal()
 {
     std::string name, city, code;
     printAddNewTerminalPanel("Station", name, city, code);
+    transform(code.begin(), code.end(), code.begin(), ::toupper);
 
     std::string message;
+    bool success = false;
+
     if (name.size() == 0)
     {
-        message = "Failed to add station.\nStation name is required.";
+        message = "Station name is required.";
     }
     else if (city.size() == 0)
     {
-        message = "Failed to add station.\nStation city is required.";
+        message = "Station city is required.";
     }
     else if (code.size() == 0)
     {
-        message = "Failed to add station.\nStation city is required.";
+        message = "Station Code is required.";
+    }
+    else if (code.size() > 4)
+    {
+        message = "Station Code size is more than 4: " + code;
+    }
+    else if (!isOnlyAlphas(name, " "))
+    {
+        message = "Station Name can only have alphabets and underscores: " + name;
+    }
+    else if (!isOnlyAlphas(city, " "))
+    {
+        message = "Station City can only have alphabets and underscores: " + city;
+    }
+    else if (!isOnlyAlphas(code))
+    {
+        message = "Invalid characters in station code: " + code;
+    }
+    else if (cityCodeToTerminalPosition(allStationsList, code) != -1)
+    {
+        message = "Station Code already exists.";
     }
     else
     {
-        int validChar = isOnlyAlphas(code);
-        if (!validChar)
-        {
-            message = "Failed to add airport.\nInvalid characters in code: " + code;
-        }
-        else if (code.size() > 4)
-        {
-            message = "Failed to add airport.\nCode size is more than 4: " + code;
-        }
-        else
-        {
-            transform(code.begin(), code.end(), code.begin(), ::toupper);
-            int stationPosition = codeToTerminalPosition(allStationsList, code);
-            if (stationPosition == -1)
-            {
-                allStationsList.push_back(new Terminal(name, city, code));
-                // writing into file
-                message = "Station Added successfully";
-            }
-            else
-                message = "Failed to add station.\nStation Code already exists.";
-        }
+        allStationsList.push_back(new Terminal(name, city, code));
+        // writing into file
+        success = true;
     }
-    printAlert(message);
+
+    if (success)
+    {
+        printAlert("Station Added successfully");
+    }
+    else
+    {
+        printAlert("Failed to add station.\n" + message);
+    }
 }
 void TrainAdmin::addNewTransport()
 {
@@ -392,32 +434,37 @@ void TrainAdmin::addNewTransport()
     std::string name, number, coveringCitiesCode, departureTimes, totalSeats;
     printAddNewTransportPanel("Train", citiesCount, name, number, coveringCitiesCode, departureTimes, totalSeats);
 
+    transform(coveringCitiesCode.begin(), coveringCitiesCode.end(), coveringCitiesCode.begin(), ::toupper);
+
     if (citiesCount == -1)
     {
         printAlert("Failed to add Train.\nCities count should be integer");
-        return;
     }
-
-    if (name.size() == 0)
+    else if (name.size() == 0)
     {
         printAlert("Failed to add Train.\nTrain Name is Required");
+    }
+    else if (number.size() == 0)
+    {
+        printAlert("Failed to add Train.\nTrain Number is Required");
+    }
+    else if (!isOnlyAlphas(name, " "))
+    {
+        printAlert("Failed to add Train.\nTrain Name can only have alphabets and underscores: " + name);
     }
     else if (number.size() != 5 || !isOnlyDigits(number))
     {
         printAlert("Failed to add Train.\nTrain Number is Invalid");
     }
+    else if (numberToTransportPosition("Train", number) != -1)
+    {
+        printAlert("Failed to add Train.\nTrain Number already exists.");
+    }
     else
     {
-        // checking if train number is unique
-        int trainPosition = numberToTransportPosition("Train", number);
-        if (trainPosition != -1)
-        {
-            printAlert("Failed to add Train.\nTrain Number already exists.");
-            return;
-        }
-
         // separating cities
         std::vector<std::string> cityCodes = stringToVectorString(coveringCitiesCode);
+        std::vector<Terminal *> coveringStations;
         if (cityCodes.size() != citiesCount)
         {
             printAlert("Failed to add Train.\nNo. of cities provided does not match cities count");
@@ -425,50 +472,43 @@ void TrainAdmin::addNewTransport()
         }
         for (std::string &cityCode : cityCodes)
         {
-            transform(cityCode.begin(), cityCode.end(), cityCode.begin(), ::toupper);
+            int stationPosition = cityCodeToTerminalPosition(allStationsList, cityCode);
+            if (stationPosition == -1)
+            {
+                printAlert("Failed to add train\nA station does not exists: " + cityCode);
+                return;
+            }
+            coveringStations.push_back(allStationsList[stationPosition]);
         }
 
-        // separating times
+        // separating destination times of stations
         std::vector<std::string> cityTimes = stringToVectorString(departureTimes);
+        std::vector<DateTime *> cityDTs;
         if (cityTimes.size() != citiesCount)
         {
             printAlert("Failed to add Train.\nNo. of departure times provided does not match cities count");
             return;
         }
-
-        ListNode *coveringCities;
-        ListNode *movingPtr = coveringCities;
-
-        // validating and adding stations to the list
+        // checking and storing destination times for each city
         for (int i = 0; i < citiesCount; i++)
         {
-            int stationPosition = codeToTerminalPosition(allStationsList, cityCodes[i]);
-            if (stationPosition == -1)
-            {
-                printAlert("Failed to add Train.\nA station does not exists : " + cityCodes[i]);
-                return;
-            }
             DateTime *DT = stringToDateTime(cityTimes[i]);
             if (DT == NULL)
             {
                 printAlert("Failed to add Train.\nA date time format is wrong : " + cityTimes[i]);
                 return;
             }
-            if (i > 0 && *DT <= movingPtr->departureTime)
+            if (i > 0 && (*DT) <= (*cityDTs.back()))
             {
                 printAlert("Failed to add Train.\nA date time difference is equal or negative: " + cityTimes[i - 1] + " " + cityTimes[i]);
                 return;
             }
-            movingPtr->next = new ListNode;
-            movingPtr = movingPtr->next;
-            movingPtr->currentTerminal = *allStationsList[stationPosition];
-            movingPtr->departureTime = *DT;
+            cityDTs.push_back(DT);
         }
 
+        // checking and storing no. of seats in each seat class
         std::vector<std::string> seatsCt = stringToVectorString(totalSeats);
         std::vector<int> seatsInInt;
-
-        // checking no. of seats in each class
         if (seatsCt.size() != 4)
         {
             printAlert("Failed to add Train.\nSeats provided does not match.");
@@ -482,9 +522,20 @@ void TrainAdmin::addNewTransport()
             }
             else
             {
-                printAlert("Failed to add Train.\nNumber of seat is invalid: " + seat);
+                printAlert("Failed to add Train.\nNumber of seats is invalid: " + seat);
                 return;
             }
+        }
+
+        // adding station to the covering cities list
+        ListNode *coveringCities = new ListNode();
+        ListNode *movingPtr = coveringCities;
+        for (int i = 0; i < citiesCount; i++)
+        {
+            movingPtr->next = new ListNode;
+            movingPtr = movingPtr->next;
+            movingPtr->currentTerminal = *coveringStations[i];
+            movingPtr->departureTime = *cityDTs[i];
         }
 
         allTrainsList.push_back(new Train(name, number, coveringCities->next, seatsInInt));
@@ -497,33 +548,50 @@ void TrainAdmin::removeTerminal()
     std::string stationCode;
     printRemoveTerminalPanel("Station", stationCode);
 
+    transform(stationCode.begin(), stationCode.end(), stationCode.begin(), ::toupper);
+
+    bool success = false;
+    std::string message;
+
     if (!isOnlyAlphas(stationCode))
     {
-        printAlert("Failed to remove Station.\nInvalid Station Code");
+        message = "Invalid Station Code";
     }
     else
     {
-        transform(stationCode.begin(), stationCode.end(), stationCode.begin(), ::toupper);
-        int stationPosition = codeToTerminalPosition(allStationsList, stationCode);
+        int stationPosition = cityCodeToTerminalPosition(allStationsList, stationCode);
         if (stationPosition != -1)
         {
             allStationsList.erase(allStationsList.begin() + stationPosition);
             // delete from file
-            printAlert("Station removed successfully");
+            success = true;
         }
         else
         {
-            printAlert("Failed to remove Station.\nStation does not exists.");
+            message = "Station does not exists.";
         }
+    }
+
+    if (success)
+    {
+        printAlert("Station removed successfully");
+    }
+    else
+    {
+        printAlert("Failed to remove Station.\n" + message);
     }
 }
 void TrainAdmin::removeTransport()
 {
     std::string trainNumber;
     printRemoveTransportPanel("Train", trainNumber);
+
+    bool success = false;
+    std::string message;
+
     if (!isOnlyDigits(trainNumber))
     {
-        printAlert("Failed to remove Train.\nInvalid Train Number: " + trainNumber);
+        message = "Invalid Train Number: " + trainNumber;
     }
     else
     {
@@ -532,12 +600,21 @@ void TrainAdmin::removeTransport()
         {
             allTrainsList.erase(allTrainsList.begin() + trainPosition);
             // writing into file
-            printAlert("Train removed successfully");
+            success = true;
         }
         else
         {
-            printAlert("Failed to remove Train.\nTrain does not exists.");
+            message = "Train does not exists.";
         }
+    }
+
+    if (success)
+    {
+        printAlert("Train removed successfully");
+    }
+    else
+    {
+        printAlert("Failed to remove Train.\n" + message);
     }
 }
 
@@ -590,46 +667,58 @@ void FlightAdmin::addNewTerminal()
 {
     std::string name, city, code;
     printAddNewTerminalPanel("Airport", name, city, code);
+    transform(code.begin(), code.end(), code.begin(), ::toupper);
 
+    bool success = false;
     std::string message;
+
     if (name.size() == 0)
     {
-        message = "Failed to add airport.\nAirport name is required. ";
+        message = "Airport name is required. ";
     }
     else if (city.size() == 0)
     {
-        message = "Failed to add airport.\nAirport city is required.";
+        message = "Airport city is required.";
     }
     else if (code.size() == 0)
     {
-        message = "Failed to add airport.\nAirport city is required. ";
+        message = "Airport code is required. ";
+    }
+    else if (code.size() > 4)
+    {
+        message = "Airport Code length is more than 4: " + code;
+    }
+    else if (!isOnlyAlphas(name, " "))
+    {
+        message = "Airport Name can only have alphabets and underscores: " + name;
+    }
+    else if (!isOnlyAlphas(city, " "))
+    {
+        message = "Airport City can only have alphabets and underscores: " + city;
+    }
+    else if (!isOnlyDigitOrAlpha(code))
+    {
+        message = "Invalid characters in airport code: " + code;
+    }
+    else if (cityCodeToTerminalPosition(allAirportsList, code) != -1)
+    {
+        message = "Airport Code already exists.";
     }
     else
     {
-        int validChar = isOnlyDigitOrAlpha(code);
-        if (!validChar)
-        {
-            message = "Failed to add airport.\nInvalid characters in code: " + code;
-        }
-        else if (code.size() > 4)
-        {
-            message = "Failed to add airport.\nCode size is more than 4: " + code;
-        }
-        else
-        {
-            transform(code.begin(), code.end(), code.begin(), ::toupper);
-            int airportPosition = codeToTerminalPosition(allAirportsList, code);
-            if (airportPosition == -1)
-            {
-                allAirportsList.push_back(new Terminal(name, city, code));
-                // writing into file
-                message = "Airport Added successfully";
-            }
-            else
-                message = "Failed to add airport.\nAirport Code already exists.";
-        }
+        allAirportsList.push_back(new Terminal(name, city, code));
+        // writing into file
+        success = true;
     }
-    printAlert(message);
+
+    if (success)
+    {
+        printAlert("Airport Added successfully");
+    }
+    else
+    {
+        printAlert("Failed to add airport.\n" + message);
+    }
 }
 void FlightAdmin::addNewTransport()
 {
@@ -637,13 +726,14 @@ void FlightAdmin::addNewTransport()
     std::string name, number, coveringCitiesCode, departureTimes, totalSeats;
     printAddNewTransportPanel("Flight", citiesCount, name, number, coveringCitiesCode, departureTimes, totalSeats);
 
+    transform(number.begin(), number.end(), number.begin(), ::toupper);
+    transform(coveringCitiesCode.begin(), coveringCitiesCode.end(), coveringCitiesCode.begin(), ::toupper);
+
     if (citiesCount == -1)
     {
         printAlert("Failed to add Flight.\nCities count should be integer");
-        return;
     }
-
-    if (name.size() == 0)
+    else if (name.size() == 0)
     {
         printAlert("Failed to add Flight.\nFlight Name is Required");
     }
@@ -651,76 +741,70 @@ void FlightAdmin::addNewTransport()
     {
         printAlert("Failed to add Flight.\nFlight Number is Invalid");
     }
+    else if (numberToTransportPosition("Flight", number) != -1)
+    {
+        printAlert("Failed to add Flight.\nFlight Number already exists.");
+    }
     else
     {
-        transform(number.begin(), number.end(), number.begin(), ::toupper);
-
-        // checking if flight number is unique
-        int flightPosition = numberToTransportPosition("Flight", number);
-        if (flightPosition != -1)
-        {
-            printAlert("Failed to add Flight.\nFlight Number already exists.");
-            return;
-        }
-
+        std::cout << "A ";
         // separating cities
         std::vector<std::string> cityCodes = stringToVectorString(coveringCitiesCode);
+        std::vector<Terminal> coveringAirports;
         if (cityCodes.size() != citiesCount)
         {
-            printAlert("Failed to add Flight.\nNo. of cities provided does not match cities count");
+            printAlert("Failed to add Flight.\nNo. of cities provided does not match cities count.");
             return;
         }
+        std::cout << "A ";
         for (std::string &cityCode : cityCodes)
         {
-            transform(cityCode.begin(), cityCode.end(), cityCode.begin(), ::toupper);
-        }
-
-        // separating times
-        std::vector<std::string> cityTimes = stringToVectorString(departureTimes);
-        if (cityTimes.size() != citiesCount)
-        {
-            printAlert("Failed to add Flight.\nNo. of departure times provided does not match cities count.");
-            return;
-        }
-
-        ListNode *coveringCities;
-        ListNode *movingPtr = coveringCities;
-
-        // validating and adding airports to the list
-        for (int i = 0; i < citiesCount; i++)
-        {
-            int airportPosition = codeToTerminalPosition(allAirportsList, cityCodes[i]);
+            int airportPosition = cityCodeToTerminalPosition(allAirportsList, cityCode);
             if (airportPosition == -1)
             {
-                printAlert("Failed to add Flight.\nAn airport does not exists : " + cityCodes[i]);
+                printAlert("Failed to add Flight\nAn airport does not exists: " + cityCode);
                 return;
             }
+            coveringAirports.push_back(*allAirportsList[airportPosition]);
+        }
+
+        std::cout << "A ";
+        // separating destination times of stations
+        std::vector<std::string> cityTimes = stringToVectorString(departureTimes);
+        std::vector<DateTime> cityDTs;
+        if (cityTimes.size() != citiesCount)
+        {
+            printAlert("Failed to add Train.\nNo. of departure times provided does not match cities count.");
+            return;
+        }
+        std::cout << "A ";
+        // checking and storing destination times for each city
+        for (int i = 0; i < citiesCount; i++)
+        {
             DateTime *DT = stringToDateTime(cityTimes[i]);
             if (DT == NULL)
             {
-                printAlert("Failed to add Flight.\nA date time format is wrong : " + cityTimes[i]);
+                printAlert("Failed to add Train.\nA date time format is wrong : " + cityTimes[i]);
                 return;
             }
-            if (i > 0 && *DT <= movingPtr->departureTime)
+            if (i > 0 && (*DT) <= cityDTs.back())
             {
-                printAlert("Failed to add Flight.\nA date time difference is equal or negative: " + cityTimes[i - 1] + " " + cityTimes[i]);
+                printAlert("Failed to add Train.\nA date time difference is equal or negative: " + cityTimes[i - 1] + " " + cityTimes[i]);
                 return;
             }
-            movingPtr->next = new ListNode;
-            movingPtr = movingPtr->next;
-            movingPtr->currentTerminal = *allAirportsList[airportPosition];
-            movingPtr->departureTime = *DT;
+            cityDTs.push_back(*DT);
         }
 
+        std::cout << "A ";
+        // checking and adding no. of seats in each class
         std::vector<std::string> seatsCt = stringToVectorString(totalSeats);
         std::vector<int> seatsInInt;
-
-        // checking and adding no. of seats in each class
         if (seatsCt.size() != citiesCount)
         {
             printAlert("Failed to add Flight.\nSeats provided does not match.");
             return;
         }
+        std::cout << "A ";
         for (std::string seat : seatsCt)
         {
             if (isOnlyDigits(seat))
@@ -734,6 +818,24 @@ void FlightAdmin::addNewTransport()
             }
         }
 
+        std::cout << "A ";
+        // validating and adding airports to the list
+        ListNode *coveringCities = new ListNode();
+        ListNode *movingPtr = coveringCities;
+        for (int i = 0; i < citiesCount; i++)
+        {
+            std::cout << "A" << i << " ";
+            movingPtr->next = new ListNode();
+            std::cout << "A" << i << " ";
+            movingPtr = movingPtr->next;
+            std::cout << "A" << i << " ";
+            movingPtr->currentTerminal = coveringAirports[i];
+            std::cout << "A" << i << " ";
+            movingPtr->departureTime = cityDTs[i];
+            std::cout << "A" << i << " ";
+        }
+        std::cout << "A ";
+
         allFlightsList.push_back(new Flight(name, number, coveringCities->next, seatsInInt));
         // write in file
         printAlert("Flight added successfully");
@@ -744,24 +846,36 @@ void FlightAdmin::removeTerminal()
     std::string airportCode;
     printRemoveTerminalPanel("Airport", airportCode);
 
+    transform(airportCode.begin(), airportCode.end(), airportCode.begin(), ::toupper);
+
+    bool success = false;
+    std::string message;
+
     if (!isOnlyAlphas(airportCode))
     {
-        printAlert("Failed to remove Airport.\nInvalid Airport Code.");
+        message = "Invalid Airport Code.";
     }
     else
     {
-        transform(airportCode.begin(), airportCode.end(), airportCode.begin(), ::toupper);
-        int airportPosition = codeToTerminalPosition(allAirportsList, airportCode);
+        int airportPosition = cityCodeToTerminalPosition(allAirportsList, airportCode);
         if (airportPosition != -1)
         {
             allAirportsList.erase(allAirportsList.begin() + airportPosition);
             // delete from file
-            printAlert("Airport removed successfully");
         }
         else
         {
-            printAlert("Failed to remove Airport.\nAirport does not exists.");
+            message = "Airport does not exists.";
         }
+    }
+
+    if (success)
+    {
+        printAlert("Failed to remove Airport.\n" + message);
+    }
+    else
+    {
+        printAlert("Airport removed successfully");
     }
 }
 void FlightAdmin::removeTransport()
@@ -769,24 +883,36 @@ void FlightAdmin::removeTransport()
     std::string flightNumber;
     printRemoveTransportPanel("Flight", flightNumber);
 
+    transform(flightNumber.begin(), flightNumber.end(), flightNumber.begin(), ::toupper);
+
+    bool success = false;
+    std::string message;
+
     if (!isOnlyDigitOrAlpha(flightNumber))
     {
-        printAlert("Failed to remove Flight.\nInvalid Flight Number: " + flightNumber);
+        message = "Invalid Flight Number: " + flightNumber;
     }
     else
     {
-        transform(flightNumber.begin(), flightNumber.end(), flightNumber.begin(), ::toupper);
         int flightPosition = numberToTransportPosition("Flight", flightNumber);
         if (flightPosition != -1)
         {
             allFlightsList.erase(allFlightsList.begin() + flightPosition);
             // writing into file
-            printAlert("Flight removed successfully");
         }
         else
         {
-            printAlert("Failed to remove Flight.\nFlight Does not exists.");
+            message = "Flight Does not exists.";
         }
+    }
+
+    if (success)
+    {
+        printAlert("Flight removed successfully");
+    }
+    else
+    {
+        printAlert("Failed to remove Flight.\n" + message);
     }
 }
 
@@ -1263,8 +1389,8 @@ FlightTicket::FlightTicket(int seatChoice, Flight *flightPtr, std::string boardi
 {
     this->seatChoice = seatChoice;
     this->pnr = pnr;
-    int board = codeToTerminalPosition(allAirportsList, boardingTerminalCode);
-    int dest = codeToTerminalPosition(allAirportsList, destinationTerminalCode);
+    int board = cityCodeToTerminalPosition(allAirportsList, boardingTerminalCode);
+    int dest = cityCodeToTerminalPosition(allAirportsList, destinationTerminalCode);
     this->boardingTerminal = allAirportsList[board];
     this->destinationTerminal = allAirportsList[dest];
     this->bookingDate = getCurrentDateTime();
@@ -1276,8 +1402,8 @@ TrainTicket::TrainTicket(int seatChoice, Train *trainPtr, std::string boardingTe
 {
     this->seatChoice = seatChoice;
     this->pnr = pnr;
-    int board = codeToTerminalPosition(allStationsList, boardingTerminalCode);
-    int dest = codeToTerminalPosition(allStationsList, destinationTerminalCode);
+    int board = cityCodeToTerminalPosition(allStationsList, boardingTerminalCode);
+    int dest = cityCodeToTerminalPosition(allStationsList, destinationTerminalCode);
     this->boardingTerminal = allStationsList[board];
     this->destinationTerminal = allStationsList[dest];
     this->bookingDate = getCurrentDateTime();

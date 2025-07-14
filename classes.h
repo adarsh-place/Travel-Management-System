@@ -77,11 +77,11 @@ public:
 class FlightAdmin : public Admin
 {
 private:
-    void adminDashboard();
-    void addNewTerminal();
-    void addNewTransport();
-    void removeTerminal();
-    void removeTransport();
+    void adminDashboard() override;
+    void addNewTerminal() override;
+    void addNewTransport() override;
+    void removeTerminal() override;
+    void removeTransport() override;
 
 public:
     FlightAdmin() {}
@@ -90,11 +90,11 @@ public:
 class TrainAdmin : public Admin
 {
 private:
-    void adminDashboard();
-    void addNewTerminal();
-    void addNewTransport();
-    void removeTerminal();
-    void removeTransport();
+    void adminDashboard() override;
+    void addNewTerminal() override;
+    void addNewTransport() override;
+    void removeTerminal() override;
+    void removeTransport() override;
 
 public:
     TrainAdmin() {}

@@ -65,13 +65,13 @@ std::string inputHashedPassword()
     while (true)
     {
         ch = _getch();
-        if (ch == '\r' || ch == '\n')  // Enter key
-        { 
+        if (ch == '\r' || ch == '\n') // Enter key
+        {
             std::cout << "\n";
             break;
         }
         else if (ch == '\b' || ch == 127) // Backspace
-        { 
+        {
             if (!password.empty())
             {
                 password.pop_back();
@@ -574,11 +574,11 @@ void printAllTrainTickets(std::vector<TrainTicket *> trainTickets)
             std::cout << "║" << putInCenter("") << "║" << "\n";
             std::cout << "║" << putInCenter(std::to_string(count) + ". " + t->trainPtr->name + "(" + t->trainPtr->number + ")") << "║" << "\n";
             std::cout << "║" << putInCenter("") << "║" << "\n";
-            std::cout << "║" << putInCenter("PNR: " + t->pnr, 30) << "                  " << putInCenter(trainSeatTypes[t->seatChoice], 30) << "║" << "\n";
-            std::cout << "║" << putInCenter("") << "║" << "\n";
             std::cout << "║           " << putInCenter(t->boardingTerminal->name, 26) << "    " << putInCenter(t->destinationTerminal->name, 26) << "           ║" << "\n";
             std::cout << "║           " << putInCenter(t->boardingTerminal->code, 26) << "--->" << putInCenter(t->destinationTerminal->code, 26) << "           ║" << "\n";
             std::cout << "║           " << putInCenter(t->boardingTerminal->city, 26) << "    " << putInCenter(t->destinationTerminal->city, 26) << "           ║" << "\n";
+            std::cout << "║" << putInCenter("") << "║" << "\n";
+            std::cout << "║" << putInCenter("PNR: " + t->pnr, 30) << putInCenter("", 18) << putInCenter(trainSeatTypes[t->seatChoice], 30) << "║" << "\n";
             std::cout << "║" << putInCenter("") << "║" << "\n";
             std::cout << "║" << putInCenter("", 78 - 32) << putInCenter("Booking Price: Rs." + std::to_string(t->price), 32) << "║" << "\n";
             std::cout << "║" << putInCenter("", 78 - 32) << putInCenter("Booked At: " + t->bookingDate->rawDT, 32) << "║" << "\n";
@@ -612,11 +612,11 @@ void printAllFlightTickets(std::vector<FlightTicket *> flightTickets)
             std::cout << "║" << putInCenter("") << "║" << "\n";
             std::cout << "║" << putInCenter(std::to_string(count) + ". " + t->flightPtr->name + "(" + t->flightPtr->number + ")") << "║" << "\n";
             std::cout << "║" << putInCenter("") << "║" << "\n";
-            std::cout << "║" << putInCenter("PNR: " + t->pnr, 30) << "                  " << putInCenter(flightSeatTypes[t->seatChoice], 30) << "║" << "\n";
-            std::cout << "║" << putInCenter("") << "║" << "\n";
             std::cout << "║           " << putInCenter(t->boardingTerminal->name, 26) << "    " << putInCenter(t->destinationTerminal->name, 26) << "           ║" << "\n";
             std::cout << "║           " << putInCenter(t->boardingTerminal->code, 26) << "--->" << putInCenter(t->destinationTerminal->code, 26) << "           ║" << "\n";
             std::cout << "║           " << putInCenter(t->boardingTerminal->city, 26) << "    " << putInCenter(t->destinationTerminal->city, 26) << "           ║" << "\n";
+            std::cout << "║" << putInCenter("") << "║" << "\n";
+            std::cout << "║" << putInCenter("PNR: " + t->pnr, 30) << putInCenter("", 18) << putInCenter(flightSeatTypes[t->seatChoice], 30) << "║" << "\n";
             std::cout << "║" << putInCenter("") << "║" << "\n";
             std::cout << "║" << putInCenter("", 78 - 32) << putInCenter("Booking Price: Rs." + std::to_string(t->price), 32) << "║" << "\n";
             std::cout << "║" << putInCenter("", 78 - 32) << putInCenter("Booked At: " + t->bookingDate->rawDT, 32) << "║" << "\n";
@@ -712,5 +712,3 @@ std::string printChangeNamePanel(std::string oldName)
 
     return newName;
 }
-
-
