@@ -1,2 +1,3 @@
-username,password,email
-john,1234,john@gmail.com
+fullName,email,password
+Aman Singh,aman@gmail.com,aman@123
+Reshmi Kapoor,reshmi@gmail.com,reshmi@123

@@ -14,10 +14,12 @@ std::vector<Train *> allTrainsList;
 std::vector<Flight *> allFlightsList;
 std::vector<Terminal *> allStationsList;
 std::vector<Terminal *> allAirportsList;
+std::vector<User *> allUsersList;
 
 FlightAdmin *flightAdmin = new FlightAdmin(flight_admin_email, flight_admin_password);
 TrainAdmin *trainAdmin = new TrainAdmin(train_admin_email, train_admin_password);
 UserManager *userManager = new UserManager();
+CSVManager *csvManager = new CSVManager();
 
 int cityCodeToTerminalPosition(std::vector<Terminal *> &terminalList, std::string &cityCode)
 {
@@ -935,7 +937,7 @@ UserManager::UserManager()
 bool UserManager::isEmailRegistered(std::string email)
 {
     bool flag = false;
-    for (User *user : this->usersList)
+    for (User *user : allUsersList)
     {
         if (user->email == email)
         {
@@ -947,7 +949,7 @@ bool UserManager::isEmailRegistered(std::string email)
 }
 User *UserManager::findUser(std::string email)
 {
-    for (User *user : this->usersList)
+    for (User *user : allUsersList)
     {
         if (email == user->email)
         {
@@ -985,8 +987,9 @@ void UserManager::userRegistrationPanel()
         else
         {
             // writing into file is left
-            this->usersList.push_back(new User(inputs[0], inputs[1], inputs[2]));
+            allUsersList.push_back(new User(inputs[0], inputs[1], inputs[2]));
             message = "You are successfully registered.";
+            csvManager->saveUsersToCSV();
         }
     }
 
@@ -1372,6 +1375,60 @@ void UserManager::changeUserName()
 }
 
 // CSVManager Class
+void CSVManager ::loadUsersFromCSV()
+{
+    std::ifstream file("data/users.csv");
+
+    if (!file.is_open())
+    {
+        std::cerr << "Error opening file for reading.\n";
+        return;
+    }
+
+    std::string line;
+    bool isHeader = true;
+
+    while (std::getline(file, line))
+    {
+        if (isHeader)
+        {
+            isHeader = false;
+            continue;
+        }
+
+        std::stringstream ss(line);
+        std::string fullName, email, password;
+
+        if (std::getline(ss, fullName, ',') &&
+            std::getline(ss, email, ',') &&
+            std::getline(ss, password, ','))
+        {
+            allUsersList.push_back(new User(fullName, email, password));
+        }
+    }
+
+    file.close();
+}
+void CSVManager ::saveUsersToCSV()
+{
+    std::ofstream file("data/users.csv");
+
+    if (!file.is_open())
+    {
+        std::cerr << "Error opening file for writing.\n";
+        return;
+    }
+
+    // Optional header
+    file << "fullName,email,password\n";
+
+    for (const auto &user : allUsersList)
+    {
+        file << user->fullName << "," << user->email << "," << user->getPassword() << "\n";
+    }
+
+    file.close();
+}
 
 // Terminal Class
 Terminal::Terminal(std::string name, std::string city, std::string code)
@@ -1419,7 +1476,10 @@ Transport::Transport(std::string name, std::string number, ListNode *coveringCit
     this->bookedSeats.assign(totalSeats.size(), 0);
 }
 
-void loadDataFromFiles() {}
+void loadDataFromFiles()
+{
+    csvManager->loadUsersFromCSV();
+}
 // void saveData(){}
 
 // Landing Screen Manager

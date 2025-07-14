@@ -11,7 +11,7 @@ int main()
     // seed for random
     srand(static_cast<unsigned int>(std::time(0)));
     
-    // loadDataFromFiles();
+    loadDataFromFiles();
     ControlPanel();
     // saveData();
     cleanMemory();

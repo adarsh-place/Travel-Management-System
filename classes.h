@@ -120,7 +120,6 @@ public:
 class UserManager
 {
 private:
-    std::vector<User *> usersList;
     User *loggedInUser;
 
     bool isEmailRegistered(std::string email);
@@ -141,6 +140,8 @@ class CSVManager
 {
 public:
     CSVManager() {}
+    void loadUsersFromCSV();
+    void saveUsersToCSV();
 };
 
 class Ticket
