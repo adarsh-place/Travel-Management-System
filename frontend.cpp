@@ -34,7 +34,9 @@ void printAlert(std::string message)
 void printExit()
 {
     system("cls");
-    std::cout << "  Thank you for visiting.\n";
+    std::cout << "╔══════════════════════════════════════════════════════════════════════════════╗" << "\n";
+    std::cout << "║" << putInCenter("Thank you for visiting") << "║" << "\n";
+    std::cout << "╚══════════════════════════════════════════════════════════════════════════════╝" << "\n";
 }
 
 char inputUserChoice(std::string text = "Enter choice: ")
@@ -118,11 +120,11 @@ void printTrainDetails(int count, Train *train)
     int cityCount = 1;
     while (tempNode != NULL)
     {
-        std::cout << "║" << putLeftPaddingAndFillRight("(" + std::to_string(cityCount) + ") " + tempNode->currentTerminal.name + " (" + tempNode->currentTerminal.code + "), " + tempNode->currentTerminal.city + " : " + tempNode->departureTime.rawDT, 8) << "║" << "\n";
+        std::cout << "║" << putLeftPaddingAndFillRight("(" + std::to_string(cityCount) + ") " + tempNode->currentTerminal.city + ", " + tempNode->currentTerminal.code + " : " + tempNode->departureTime.rawDT, 4) << "║" << "\n";
         tempNode = tempNode->next;
         cityCount++;
         if (tempNode != NULL)
-            std::cout << "║         ↓                                                                    ║" << "\n";
+            std::cout << "║     ↓                                                                        ║" << "\n";
     }
 
     std::cout << "║" << putInCenter("") << "║" << "\n";
@@ -186,13 +188,13 @@ void printFlightDetails(int count, Flight *flight)
     std::cout << "║" << putInCenter("") << "║" << "\n";
 
     ListNode *tempNode = flight->coveringCities;
-    std::cout << "║" << putLeftPaddingAndFillRight("Boarding Airport: " + tempNode->currentTerminal.name + " (" + tempNode->currentTerminal.code + "), " + tempNode->currentTerminal.city, 4) << "║\n";
+    std::cout << "║" << putLeftPaddingAndFillRight("Boarding Airport: " + tempNode->currentTerminal.city + ", " + tempNode->currentTerminal.code, 4) << "║\n";
     std::cout << "║" << putLeftPaddingAndFillRight("Boarding Date and Time: " + tempNode->departureTime.rawDT, 4) << "║\n";
 
     std::cout << "║" << putInCenter("") << "║" << "\n";
 
     tempNode = tempNode->next;
-    std::cout << "║" << putLeftPaddingAndFillRight("Destination Airport: " + tempNode->currentTerminal.name + " (" + tempNode->currentTerminal.code + "), " + tempNode->currentTerminal.city, 4) << "║\n";
+    std::cout << "║" << putLeftPaddingAndFillRight("Destination Airport: " + tempNode->currentTerminal.city + ", " + tempNode->currentTerminal.code, 4) << "║\n";
     std::cout << "║" << putLeftPaddingAndFillRight("Arrival Date and Time: " + tempNode->departureTime.rawDT, 4) << "║\n";
 
     std::cout << "║" << putInCenter("") << "║" << "\n";
@@ -439,13 +441,13 @@ void printAddNewTransportPanel(std::string transport, int &citiesCount, std::str
         // std::cout << "Enter Train Type:";
         citiesCount = inputNumber("Enter number of covering stations: ");
         std::cout << "\n";
-        std::cout << "  Enter covering stations code \n  (separated by space): ";
+        std::cout << "  Enter covering stations code \n  (separated by a single space): ";
         getline(std::cin, coveringCitiesCode);
         std::cout << "\n";
-        std::cout << "  Enter departure time from stations in order \n  (separated by space in DD/MM/YY-HH:MM format): ";
+        std::cout << "  Enter departure time from stations in order, in DD/MM/YY-HH:MM format \n  (separated by a single space): ";
         getline(std::cin, departureTimes);
         std::cout << "\n";
-        std::cout << "  Enter number of seats in each of 1st AC, 2nd AC, 3rd AC and Sleeper Class\n  (separated by space): ";
+        std::cout << "  Enter number of seats in each of 1st AC, 2nd AC, 3rd AC and Sleeper Class\n  (separated by a single space): ";
         getline(std::cin, totalSeats);
     }
     else
@@ -471,7 +473,7 @@ void printAddNewTransportPanel(std::string transport, int &citiesCount, std::str
         std::cin >> destTime;
         ignoreUptoNewLine();
         std::cout << "\n";
-        std::cout << "  Enter number of seats in each of Economy and Business Class \n  (separated by space): ";
+        std::cout << "  Enter number of seats in each of Economy and Business Class \n  (separated by a single space): ";
         getline(std::cin, totalSeats);
 
         coveringCitiesCode = board + " " + dest;
@@ -576,9 +578,10 @@ void printAllTrainTickets(std::vector<TrainTicket *> trainTickets)
             std::cout << "║" << putInCenter("") << "║" << "\n";
             std::cout << "║" << putInCenter(std::to_string(count) + ". " + t->trainPtr->name + "(" + t->trainPtr->number + ")") << "║" << "\n";
             std::cout << "║" << putInCenter("") << "║" << "\n";
-            std::cout << "║           " << putInCenter(t->boardingTerminal->name, 26) << "    " << putInCenter(t->destinationTerminal->name, 26) << "           ║" << "\n";
-            std::cout << "║           " << putInCenter(t->boardingTerminal->code, 26) << "--->" << putInCenter(t->destinationTerminal->code, 26) << "           ║" << "\n";
-            std::cout << "║           " << putInCenter(t->boardingTerminal->city, 26) << "    " << putInCenter(t->destinationTerminal->city, 26) << "           ║" << "\n";
+            // std::cout << "║           " << putInCenter(t->boardingListNode->currentTerminal->name, 26) << "    " << putInCenter(t->destinationTerminal->name, 26) << "           ║" << "\n";
+            std::cout << "║           " << putInCenter(t->boardingListNode->currentTerminal.code, 26) << "    " << putInCenter(t->destinationListNode->currentTerminal.code, 26) << "           ║" << "\n";
+            std::cout << "║           " << putInCenter(t->boardingListNode->currentTerminal.city, 26) << "--->" << putInCenter(t->destinationListNode->currentTerminal.city, 26) << "           ║" << "\n";
+            std::cout << "║           " << putInCenter("[" + t->boardingListNode->departureTime.rawDT + "]", 26) << "    " << putInCenter("[" + t->destinationListNode->departureTime.rawDT + "]", 26) << "           ║" << "\n";
             std::cout << "║" << putInCenter("") << "║" << "\n";
             std::cout << "║" << putInCenter("PNR: " + t->pnr, 30) << putInCenter("", 18) << putInCenter(trainSeatTypes[t->seatChoice], 30) << "║" << "\n";
             std::cout << "║" << putInCenter("") << "║" << "\n";
@@ -614,9 +617,10 @@ void printAllFlightTickets(std::vector<FlightTicket *> flightTickets)
             std::cout << "║" << putInCenter("") << "║" << "\n";
             std::cout << "║" << putInCenter(std::to_string(count) + ". " + t->flightPtr->name + "(" + t->flightPtr->number + ")") << "║" << "\n";
             std::cout << "║" << putInCenter("") << "║" << "\n";
-            std::cout << "║           " << putInCenter(t->boardingTerminal->name, 26) << "    " << putInCenter(t->destinationTerminal->name, 26) << "           ║" << "\n";
-            std::cout << "║           " << putInCenter(t->boardingTerminal->code, 26) << "--->" << putInCenter(t->destinationTerminal->code, 26) << "           ║" << "\n";
-            std::cout << "║           " << putInCenter(t->boardingTerminal->city, 26) << "    " << putInCenter(t->destinationTerminal->city, 26) << "           ║" << "\n";
+            // std::cout << "║           " << putInCenter(t->boardingTerminal->name, 26) << "    " << putInCenter(t->destinationTerminal->name, 26) << "           ║" << "\n";
+            std::cout << "║           " << putInCenter(t->boardingListNode->currentTerminal.code, 26) << "    " << putInCenter(t->destinationListNode->currentTerminal.code, 26) << "           ║" << "\n";
+            std::cout << "║           " << putInCenter(t->boardingListNode->currentTerminal.city, 26) << "--->" << putInCenter(t->destinationListNode->currentTerminal.city, 26) << "           ║" << "\n";
+            std::cout << "║           " << putInCenter("[" + t->boardingListNode->departureTime.rawDT + "]", 26) << "    " << putInCenter("[" + t->destinationListNode->departureTime.rawDT + "]", 26) << "           ║" << "\n";
             std::cout << "║" << putInCenter("") << "║" << "\n";
             std::cout << "║" << putInCenter("PNR: " + t->pnr, 30) << putInCenter("", 18) << putInCenter(flightSeatTypes[t->seatChoice], 30) << "║" << "\n";
             std::cout << "║" << putInCenter("") << "║" << "\n";

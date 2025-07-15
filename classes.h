@@ -138,6 +138,12 @@ public:
 
 class CSVManager
 {
+private:
+    // std::vector<int> splitAsNums(const std::string &s, char delimiter);
+    std::string join(const std::vector<std::string> &items, char delimiter);
+    std::string join(const std::vector<int> &items, char delimiter);
+    std::pair<std::string, std::string> join(ListNode *items, char delimiter);
+
 public:
     CSVManager() {}
     void loadUsersFromCSV();
@@ -145,17 +151,23 @@ public:
 
     void loadAllStations();
     void saveAllStations();
-    
+
     void loadAllAirports();
     void saveAllAirports();
+
+    void loadAllFlights();
+    void saveAllFlights();
+
+    void loadAllTrains();
+    void saveAllTrains();
 };
 
 class Ticket
 {
 public:
     DateTime *bookingDate;
-    Terminal *boardingTerminal;
-    Terminal *destinationTerminal;
+    ListNode *boardingListNode;
+    ListNode *destinationListNode;
     std::string pnr;
     int seatChoice;
     Ticket() {}
@@ -166,7 +178,7 @@ public:
     Flight *flightPtr;
     int price = 0;
     FlightTicket() {}
-    FlightTicket(int seatChoice, Flight *flightPtr, std::string boardingTerminalCode, std::string destinationTerminalCode, std::string pnr);
+    FlightTicket(int seatChoice, Flight *flightPtr, ListNode *boardingListNode, ListNode *destinationListNode, std::string pnr);
 };
 class TrainTicket : public Ticket
 {
@@ -174,7 +186,7 @@ public:
     Train *trainPtr;
     int price = 0;
     TrainTicket() {}
-    TrainTicket(int seatChoice, Train *trainPtr, std::string boardingTerminalCode, std::string destinationTerminalCode, std::string pnr);
+    TrainTicket(int seatChoice, Train *trainPtr, ListNode *boardingListNode, ListNode *destinationListNode, std::string pnr);
 };
 
 class Transport

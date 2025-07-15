@@ -13,7 +13,6 @@ int main()
     
     loadDataFromFiles();
     ControlPanel();
-    // saveData();
     cleanMemory();
     
     // default color

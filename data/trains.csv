@@ -1,2 +1,2 @@
-ID,Source,Destination,Date,Capacity,Price
-T001,Delhi,Mumbai,2025-07-11,200,150
+Number,Name,Total Seats,Booked Seats,Covering City Codes,Departure Times
+12345,hkf sdf,40|40|40|40,0|0|0|0,CSMT|NDLS|CSMT,12/11/25-01:11|12/11/25-01:13|12/11/25-01:15
