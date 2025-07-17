@@ -642,6 +642,7 @@ std::vector<std::string> printTicketBookingPanel(std::string transport)
     std::cout << "╔══════════════════════════════════════════════════════════════════════════════╗" << "\n";
     std::cout << "║" << putInCenter(transport + " Ticket Booking Panel") << "║" << "\n";
     std::cout << "╚══════════════════════════════════════════════════════════════════════════════╝" << "\n";
+    std::cout << "\n";
     std::cout << "  Enter Boarding City Code: ";
     std::cin >> boadringTerminalCode;
     ignoreUptoNewLine();

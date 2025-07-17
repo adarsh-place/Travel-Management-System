@@ -123,7 +123,6 @@ private:
     User *loggedInUser;
 
     bool isEmailRegistered(std::string email);
-    User *findUser(std::string email);
     void userDashboard();
     void ticketBookingPanel(std::string transport);
     void cancelTicketPanel(std::string transport);
@@ -134,20 +133,19 @@ public:
     UserManager();
     void userRegistrationPanel();
     void userLoginPanel();
+    User *findUser(std::string email);
 };
 
 class CSVManager
 {
 private:
-    // std::vector<int> splitAsNums(const std::string &s, char delimiter);
-    std::string join(const std::vector<std::string> &items, char delimiter);
-    std::string join(const std::vector<int> &items, char delimiter);
+    std::string join(std::vector<int> &items, char delimiter);
     std::pair<std::string, std::string> join(ListNode *items, char delimiter);
 
 public:
     CSVManager() {}
-    void loadUsersFromCSV();
-    void saveUsersToCSV();
+    void loadAllUsers();
+    void saveAllUsers();
 
     void loadAllStations();
     void saveAllStations();
@@ -160,6 +158,12 @@ public:
 
     void loadAllTrains();
     void saveAllTrains();
+
+    void loadAllFlightTickets();
+    void saveAllFlightTickets();
+
+    void loadAllTrainTickets();
+    void saveAllTrainTickets();
 };
 
 class Ticket
@@ -178,7 +182,7 @@ public:
     Flight *flightPtr;
     int price = 0;
     FlightTicket() {}
-    FlightTicket(int seatChoice, Flight *flightPtr, ListNode *boardingListNode, ListNode *destinationListNode, std::string pnr);
+    FlightTicket(int seatChoice, Flight *flightPtr, ListNode *boardingListNode, ListNode *destinationListNode, std::string pnr, DateTime *bookingDate);
 };
 class TrainTicket : public Ticket
 {
@@ -186,7 +190,7 @@ public:
     Train *trainPtr;
     int price = 0;
     TrainTicket() {}
-    TrainTicket(int seatChoice, Train *trainPtr, ListNode *boardingListNode, ListNode *destinationListNode, std::string pnr);
+    TrainTicket(int seatChoice, Train *trainPtr, ListNode *boardingListNode, ListNode *destinationListNode, std::string pnr, DateTime *bookingDate);
 };
 
 class Transport

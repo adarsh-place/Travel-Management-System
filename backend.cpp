@@ -981,7 +981,7 @@ void UserManager::userRegistrationPanel()
             // writing into file is left
             allUsersList.push_back(new User(inputs[0], inputs[1], inputs[2]));
             message = "You are successfully registered.";
-            csvManager->saveUsersToCSV();
+            csvManager->saveAllUsers();
         }
     }
 
@@ -1204,9 +1204,11 @@ void UserManager::ticketBookingPanel(std::string transport)
                     if (choosenTrain->totalSeats[seatChoice] > choosenTrain->bookedSeats[seatChoice])
                     {
                         std::string pnr = generateTrainTicketPNR();
-                        loggedInUser->trainTickets.push_back(new TrainTicket(seatChoice, choosenTrain, fromToList[trainChoice].first, fromToList[trainChoice].second, pnr));
+                        DateTime *bookingDate = getCurrentDateTime();
+                        loggedInUser->trainTickets.push_back(new TrainTicket(seatChoice, choosenTrain, fromToList[trainChoice].first, fromToList[trainChoice].second, pnr, bookingDate));
                         choosenTrain->bookedSeats[seatChoice]++;
                         // write in file;
+                        csvManager->saveAllTrainTickets();
                         printAlert("Seat Booked Successfully.");
                     }
                     else
@@ -1259,9 +1261,11 @@ void UserManager::ticketBookingPanel(std::string transport)
                     if (choosenFlight->totalSeats[seatChoice] > choosenFlight->bookedSeats[seatChoice])
                     {
                         std::string pnr = generateFlightTicketPNR();
-                        loggedInUser->flightTickets.push_back(new FlightTicket(seatChoice, choosenFlight, fromToList[flightChoice].first, fromToList[flightChoice].second, pnr));
+                        DateTime *bookingDate = getCurrentDateTime();
+                        loggedInUser->flightTickets.push_back(new FlightTicket(seatChoice, choosenFlight, fromToList[flightChoice].first, fromToList[flightChoice].second, pnr, bookingDate));
                         choosenFlight->bookedSeats[seatChoice]++;
                         // write in file;
+                        csvManager->saveAllFlightTickets();
                         printAlert("Seat Booked Successfully.");
                     }
                     else
@@ -1310,6 +1314,7 @@ void UserManager::cancelTicketPanel(std::string transport)
                 // delete ticket from allTrainTickets;
                 TrainTicket *tT = (*allTrainTickets)[ticketChoice];
                 (*allTrainTickets).erase((*allTrainTickets).begin() + ticketChoice);
+                csvManager->saveAllTrainTickets();
                 delete (tT);
             }
             else
@@ -1321,6 +1326,7 @@ void UserManager::cancelTicketPanel(std::string transport)
                 // delete ticket from allFlightTickets;
                 FlightTicket *fT = (*allFlightTickets)[ticketChoice];
                 (*allFlightTickets).erase((*allFlightTickets).begin() + ticketChoice);
+                csvManager->saveAllFlightTickets();
                 delete (fT);
             }
             printAlert("Ticket Canceled Successfully.");
@@ -1347,6 +1353,7 @@ void UserManager::changeUserPassword()
     {
         loggedInUser->setPassword(info[1]);
         // writing in file
+        csvManager->saveAllUsers();
         message = "Password Changed Successfully";
     }
     printAlert(message);
@@ -1361,6 +1368,7 @@ void UserManager::changeUserName()
     {
         this->loggedInUser->fullName = newName;
         // writing in file
+        csvManager->saveAllUsers();
         message = "Name Updated Successfully";
     }
     printAlert(message);
@@ -1377,25 +1385,25 @@ Terminal::Terminal(std::string name, std::string city, std::string code)
 // Ticket Class
 
 // FlightTicket Class
-FlightTicket::FlightTicket(int seatChoice, Flight *flightPtr, ListNode *boardingListNode, ListNode *destinationListNode, std::string pnr)
+FlightTicket::FlightTicket(int seatChoice, Flight *flightPtr, ListNode *boardingListNode, ListNode *destinationListNode, std::string pnr, DateTime *bookingDate)
     : flightPtr(flightPtr)
 {
     this->seatChoice = seatChoice;
     this->pnr = pnr;
     this->boardingListNode = boardingListNode;
     this->destinationListNode = destinationListNode;
-    this->bookingDate = getCurrentDateTime();
+    this->bookingDate = bookingDate;
 }
 
 // TrainTicket Class
-TrainTicket::TrainTicket(int seatChoice, Train *trainPtr, ListNode *boardingListNode, ListNode *destinationListNode, std::string pnr)
+TrainTicket::TrainTicket(int seatChoice, Train *trainPtr, ListNode *boardingListNode, ListNode *destinationListNode, std::string pnr, DateTime *bookingDate)
     : trainPtr(trainPtr)
 {
     this->seatChoice = seatChoice;
     this->pnr = pnr;
     this->boardingListNode = boardingListNode;
     this->destinationListNode = destinationListNode;
-    this->bookingDate = getCurrentDateTime();
+    this->bookingDate = bookingDate;
 }
 
 // Transport Class
@@ -1409,18 +1417,7 @@ Transport::Transport(std::string name, std::string number, ListNode *coveringCit
 }
 
 // CSVManager Class
-// std::string CSVManager ::join(const std::vector<std::string> &items, char delimiter)
-// {
-//     std::string comb = "";
-//     for (int i = 0; i < items.size(); i++)
-//     {
-//         comb += items[i];
-//         if (i < items.size() - 1)
-//             comb += delimiter;
-//     }
-//     return comb;
-// }
-std::string CSVManager ::join(const std::vector<int> &items, char delimiter)
+std::string CSVManager ::join(std::vector<int> &items, char delimiter)
 {
     std::string comb = "";
     for (int i = 0; i < items.size(); i++)
@@ -1453,7 +1450,7 @@ std::pair<std::string, std::string> CSVManager ::join(ListNode *items, char deli
     return {cityCodes, departureTimes};
 }
 
-void CSVManager ::loadUsersFromCSV()
+void CSVManager ::loadAllUsers()
 {
     std::ifstream file("data/users.csv");
 
@@ -1575,48 +1572,31 @@ void CSVManager ::loadAllFlights()
         }
 
         std::stringstream ss(line);
-        std::string number, name, totalSeatsStr, bookedSeatsStr, citiesStr, timesStr;
+        std::string number, name, totalSeatsStr, citiesStr, timesStr;
 
         if (std::getline(ss, number, ',') &&
             std::getline(ss, name, ',') &&
             std::getline(ss, totalSeatsStr, ',') &&
-            std::getline(ss, bookedSeatsStr, ',') &&
             std::getline(ss, citiesStr, ',') &&
             std::getline(ss, timesStr, ','))
         {
-            Flight *flight = new Flight();
-            flight->number = number;
-            flight->name = name;
-            flight->totalSeats = splitAsNums(totalSeatsStr, '|');
-            flight->bookedSeats = splitAsNums(bookedSeatsStr, '|');
-            
-            std::cout<<"A ";
+            std::vector<int> totalSeats = splitAsNums(totalSeatsStr, '|');
             std::vector<std::string> cityCodes = splitAsStrings(citiesStr, '|');
-            std::cout<<"A ";
             std::vector<std::string> cityTimes = splitAsStrings(timesStr, '|');
-            std::cout<<"A ";
-            
+
             ListNode *citiesList = new ListNode();
             ListNode *movingPtr = citiesList;
-            std::cout<<"A ";
             for (int i = 0; i < cityCodes.size(); i++)
             {
-                std::cout<<"B ";
                 int flightPosition = cityCodeToTerminalPosition(allAirportsList, cityCodes[i]);
-                
-                std::cout<<"B ";
+
                 movingPtr->next = new ListNode();
                 movingPtr = movingPtr->next;
-                std::cout<<"B ";
                 movingPtr->currentTerminal = *allAirportsList[flightPosition];
                 movingPtr->departureTime = *stringToDateTime(cityTimes[i]);
-                std::cout<<"B ";
             }
-            std::cout<<"A ";
-            flight->coveringCities = citiesList->next;
-            
-            std::cout<<"A ";
-            allFlightsList.push_back(flight);
+
+            allFlightsList.push_back(new Flight(name, number, citiesList->next, totalSeats));
         }
     }
 
@@ -1642,22 +1622,15 @@ void CSVManager ::loadAllTrains()
         }
 
         std::stringstream ss(line);
-        std::string number, name, totalSeatsStr, bookedSeatsStr, citiesStr, timesStr;
+        std::string number, name, totalSeatsStr, citiesStr, timesStr;
 
         if (std::getline(ss, number, ',') &&
             std::getline(ss, name, ',') &&
             std::getline(ss, totalSeatsStr, ',') &&
-            std::getline(ss, bookedSeatsStr, ',') &&
             std::getline(ss, citiesStr, ',') &&
             std::getline(ss, timesStr, ','))
         {
-
-            Train *train = new Train();
-            train->number = number;
-            train->name = name;
-            train->totalSeats = splitAsNums(totalSeatsStr, '|');
-            train->bookedSeats = splitAsNums(bookedSeatsStr, '|');
-
+            std::vector<int> totalSeats = splitAsNums(totalSeatsStr, '|');
             std::vector<std::string> cityCodes = splitAsStrings(citiesStr, '|');
             std::vector<std::string> cityTimes = splitAsStrings(timesStr, '|');
 
@@ -1672,22 +1645,115 @@ void CSVManager ::loadAllTrains()
                 movingPtr->currentTerminal = *allStationsList[stationPosition];
                 movingPtr->departureTime = *stringToDateTime(cityTimes[i]);
             }
-            train->coveringCities = citiesList->next;
 
-            allTrainsList.push_back(train);
+            allTrainsList.push_back(new Train(name, number, citiesList->next, totalSeats));
+        }
+    }
+
+    file.close();
+}
+void CSVManager ::loadAllFlightTickets()
+{
+    std::ifstream file("data/flight_tickets.csv");
+
+    if (!file.is_open())
+    {
+        printAlert("Error opening flight tickets file for reading.");
+        return;
+    }
+
+    std::string line;
+    bool isHeader = true;
+
+    while (std::getline(file, line))
+    {
+        if (isHeader)
+        {
+            isHeader = false;
+            continue;
+        }
+
+        std::stringstream ss(line);
+        std::string email, pnr, flightNumber, boarding, destination, seatChoice, bookigDate;
+
+        if (std::getline(ss, email, ',') &&
+            std::getline(ss, pnr, ',') &&
+            std::getline(ss, flightNumber, ',') &&
+            std::getline(ss, boarding, ',') &&
+            std::getline(ss, destination, ',') &&
+            std::getline(ss, seatChoice, ',') &&
+            std::getline(ss, bookigDate, ','))
+        {
+            User *user = userManager->findUser(email);
+            int flightPosition = numberToTransportPosition("Flight", flightNumber);
+            Flight *flight = allFlightsList[flightPosition];
+            int seatType = stoi(seatChoice);
+            DateTime *bookingDateTime = stringToDateTime(bookigDate);
+            auto terminals = terminalsInTransportRoute(flight->coveringCities, boarding, destination);
+
+            flight->bookedSeats[seatType]++;
+
+            user->flightTickets.push_back(new FlightTicket(seatType, flight, terminals.first, terminals.second, pnr, bookingDateTime));
+        }
+    }
+
+    file.close();
+}
+void CSVManager ::loadAllTrainTickets()
+{
+    std::ifstream file("data/train_tickets.csv");
+
+    if (!file.is_open())
+    {
+        printAlert("Error opening train tickets file for reading.");
+        return;
+    }
+
+    std::string line;
+    bool isHeader = true;
+
+    while (std::getline(file, line))
+    {
+        if (isHeader)
+        {
+            isHeader = false;
+            continue;
+        }
+
+        std::stringstream ss(line);
+        std::string email, pnr, trainNumber, boarding, destination, seatChoice, bookigDate;
+
+        if (std::getline(ss, email, ',') &&
+            std::getline(ss, pnr, ',') &&
+            std::getline(ss, trainNumber, ',') &&
+            std::getline(ss, boarding, ',') &&
+            std::getline(ss, destination, ',') &&
+            std::getline(ss, seatChoice, ',') &&
+            std::getline(ss, bookigDate, ','))
+        {
+            User *user = userManager->findUser(email);
+            int trainPosition = numberToTransportPosition("Train", trainNumber);
+            Train *train = allTrainsList[trainPosition];
+            int seatType = stoi(seatChoice);
+            DateTime *bookingDateTime = stringToDateTime(bookigDate);
+            auto terminals = terminalsInTransportRoute(train->coveringCities, boarding, destination);
+
+            train->bookedSeats[seatType]++;
+
+            user->trainTickets.push_back(new TrainTicket(seatType, train, terminals.first, terminals.second, pnr, bookingDateTime));
         }
     }
 
     file.close();
 }
 
-void CSVManager ::saveUsersToCSV()
+void CSVManager ::saveAllUsers()
 {
     std::ofstream file("data/users.csv");
 
     if (!file.is_open())
     {
-        printAlert("Error opening users file for reading.");
+        printAlert("Error opening users file for writing.");
         return;
     }
 
@@ -1707,7 +1773,7 @@ void CSVManager ::saveAllStations()
 
     if (!file.is_open())
     {
-        printAlert("Error opening stations file for reading.");
+        printAlert("Error opening stations file for writing.");
         return;
     }
 
@@ -1727,7 +1793,7 @@ void CSVManager ::saveAllAirports()
 
     if (!file.is_open())
     {
-        printAlert("Error opening airports file for reading.");
+        printAlert("Error opening airports file for writing.");
         return;
     }
 
@@ -1746,23 +1812,21 @@ void CSVManager ::saveAllFlights()
     std::ofstream file("data/flights.csv");
     if (!file.is_open())
     {
-        printAlert("Error opening flights file for reading.");
+        printAlert("Error opening flights file for writing.");
         return;
     }
 
     // Write header
-    file << "Number,Name,Total Seats,Booked Seats,Covering City Codes,Departure Times\n";
+    file << "Number,Name,Total Seats,Covering City Codes,Departure Times\n";
 
     for (const auto &flight : allFlightsList)
     {
         std::string totalSeats = join(flight->totalSeats, '|');
-        std::string bookedSeats = join(flight->bookedSeats, '|');
         auto coveringCities = join(flight->coveringCities, '|');
 
         file << flight->number << ","
              << flight->name << ","
              << totalSeats << ","
-             << bookedSeats << ","
              << coveringCities.first << ","
              << coveringCities.second << "\n";
     }
@@ -1774,25 +1838,79 @@ void CSVManager ::saveAllTrains()
     std::ofstream file("data/trains.csv");
     if (!file.is_open())
     {
-        printAlert("Error opening trains file for reading.");
+        printAlert("Error opening trains file for writing.");
         return;
     }
 
     // Write header
-    file << "Number,Name,Total Seats,Booked Seats,Covering City Codes,Departure Times\n";
+    file << "Number,Name,Total Seats,Covering City Codes,Departure Times\n";
 
     for (const auto &train : allTrainsList)
     {
         std::string totalSeats = join(train->totalSeats, '|');
-        std::string bookedSeats = join(train->bookedSeats, '|');
         auto coveringCities = join(train->coveringCities, '|');
 
         file << train->number << ","
              << train->name << ","
              << totalSeats << ","
-             << bookedSeats << ","
              << coveringCities.first << ","
              << coveringCities.second << "\n";
+    }
+
+    file.close();
+}
+void CSVManager ::saveAllFlightTickets()
+{
+    std::ofstream file("data/flight_tickets.csv");
+    if (!file.is_open())
+    {
+        printAlert("Error opening flight tickets file for writing.");
+        return;
+    }
+
+    // Write header
+    file << "User Email,PNR,Flight Number,From,To,Seat Choice,Booking Date\n";
+
+    for (const auto &user : allUsersList)
+    {
+        for (const auto &ticket : user->flightTickets)
+        {
+            file << user->email << ","
+                 << ticket->pnr << ","
+                 << ticket->flightPtr->number << ","
+                 << ticket->boardingListNode->currentTerminal.code << ","
+                 << ticket->destinationListNode->currentTerminal.code << ","
+                 << std::to_string(ticket->seatChoice) << ","
+                 << ticket->bookingDate->rawDT << "\n";
+        }
+    }
+
+    file.close();
+}
+void CSVManager ::saveAllTrainTickets()
+{
+    std::ofstream file("data/train_tickets.csv");
+    if (!file.is_open())
+    {
+        printAlert("Error opening train tickets file for writing.");
+        return;
+    }
+
+    // Write header
+    file << "User Email,PNR,Train Number,From,To,Seat Choice,Booking Date\n";
+
+    for (const auto &user : allUsersList)
+    {
+        for (const auto &ticket : user->trainTickets)
+        {
+            file << user->email << ","
+                 << ticket->pnr << ","
+                 << ticket->trainPtr->number << ","
+                 << ticket->boardingListNode->currentTerminal.code << ","
+                 << ticket->destinationListNode->currentTerminal.code << ","
+                 << std::to_string(ticket->seatChoice) << ","
+                 << ticket->bookingDate->rawDT << "\n";
+        }
     }
 
     file.close();
@@ -1800,13 +1918,16 @@ void CSVManager ::saveAllTrains()
 
 void loadDataFromFiles()
 {
-    csvManager->loadUsersFromCSV();
+    csvManager->loadAllUsers();
 
     csvManager->loadAllStations();
     csvManager->loadAllAirports();
 
     csvManager->loadAllTrains();
     csvManager->loadAllFlights();
+
+    csvManager->loadAllFlightTickets();
+    csvManager->loadAllTrainTickets();
 }
 
 // Landing Screen Manager
@@ -1897,5 +2018,4 @@ void cleanMemory()
     delete (flightAdmin);
     delete (trainAdmin);
     delete (userManager);
-
 }
