@@ -2062,7 +2062,7 @@ void CSVManager ::saveAllFlights()
 }
 void CSVManager ::saveNewTrainTicket(TrainTicket *newTicket, std::string email)
 {
-    std::ofstream file("data/train_tickets.csv");
+    std::ofstream file("data/train_tickets.csv", std::ios::app);
     if (!file.is_open())
     {
         printAlert("Error opening train tickets file for appending.");
@@ -2108,7 +2108,7 @@ void CSVManager ::saveAllTrainTickets()
 }
 void CSVManager ::saveNewFlightTicket(FlightTicket *newTicket, std::string email)
 {
-    std::ofstream file("data/flight_tickets.csv");
+    std::ofstream file("data/flight_tickets.csv", , std::ios::app);
     if (!file.is_open())
     {
         printAlert("Error opening flight tickets file for appending.");
