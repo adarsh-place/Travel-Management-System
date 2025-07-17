@@ -130,30 +130,30 @@ void printTrainDetails(int count, Train *train)
     std::cout << "║" << putInCenter("") << "║" << "\n";
 
     std::cout << "║       ┌────────────────┬────────────┬────────────────────────────────┐       ║\n";
-    std::cout << "║       │   Seat Type    │    Price   │     Total Seats(Available)     │       ║\n";
+    std::cout << "║       │   Seat Type    │   Price    │     Total Seats(Available)     │       ║\n";
     std::cout << "║       ├────────────────┼────────────┼────────────────────────────────┤       ║\n";
-    std::cout << "║       │    First AC    │  Rs. 4000  │" + putLeftPaddingAndFillRight(std::to_string(train->totalSeats[0]) + "(" + std::to_string(train->totalSeats[0] - train->bookedSeats[0]) + ")", 10, 32) << "│       ║\n";
-    std::cout << "║       │    Second AC   │  Rs. 3000  │" + putLeftPaddingAndFillRight(std::to_string(train->totalSeats[1]) + "(" + std::to_string(train->totalSeats[1] - train->bookedSeats[1]) + ")", 10, 32) << "│       ║\n";
-    std::cout << "║       │    Third AC    │  Rs. 2000  │" + putLeftPaddingAndFillRight(std::to_string(train->totalSeats[2]) + "(" + std::to_string(train->totalSeats[2] - train->bookedSeats[2]) + ")", 10, 32) << "│       ║\n";
-    std::cout << "║       │  Sleeper Class │  Rs. 1000  │" + putLeftPaddingAndFillRight(std::to_string(train->totalSeats[3]) + "(" + std::to_string(train->totalSeats[3] - train->bookedSeats[3]) + ")", 10, 32) << "│       ║\n";
+    std::cout << "║       │    First AC    │" << putInCenter("Rs. " + std::to_string(train->seatPrices[0]), 12) << "│" + putLeftPaddingAndFillRight(std::to_string(train->totalSeats[0]) + "(" + std::to_string(train->totalSeats[0] - train->bookedSeats[0]) + ")", 10, 32) << "│       ║\n";
+    std::cout << "║       │    Second AC   │" << putInCenter("Rs. " + std::to_string(train->seatPrices[1]), 12) << "│" + putLeftPaddingAndFillRight(std::to_string(train->totalSeats[1]) + "(" + std::to_string(train->totalSeats[1] - train->bookedSeats[1]) + ")", 10, 32) << "│       ║\n";
+    std::cout << "║       │    Third AC    │" << putInCenter("Rs. " + std::to_string(train->seatPrices[2]), 12) << "│" + putLeftPaddingAndFillRight(std::to_string(train->totalSeats[2]) + "(" + std::to_string(train->totalSeats[2] - train->bookedSeats[2]) + ")", 10, 32) << "│       ║\n";
+    std::cout << "║       │  Sleeper Class │" << putInCenter("Rs. " + std::to_string(train->seatPrices[3]), 12) << "│" + putLeftPaddingAndFillRight(std::to_string(train->totalSeats[3]) + "(" + std::to_string(train->totalSeats[3] - train->bookedSeats[3]) + ")", 10, 32) << "│       ║\n";
     std::cout << "║       └────────────────┴────────────┴────────────────────────────────┘       ║\n";
 }
-void printAllTrains(std::vector<Train *> allTrainsList, std::vector<int> positions = {})
+void printAllTrains(std::vector<Train *> allTrainsList, bool printPositions = false, std::vector<int> positions = {})
 {
     system("cls");
     std::cout << "╔══════════════════════════════════════════════════════════════════════════════╗" << "\n";
     std::cout << "║" << putInCenter("All Available Trains") << "║" << "\n";
     std::cout << "╠══════════════════════════════════════════════════════════════════════════════╣" << "\n";
 
-    if (allTrainsList.size() == 0)
+    int count = 1;
+    if (!printPositions)
     {
-        std::cout << "║" << putInCenter("") << "║" << "\n";
-        std::cout << "║" << putInCenter("No Trains are available") << "║" << "\n";
-    }
-    else
-    {
-        int count = 1;
-        if (positions.size() == 0)
+        if (allTrainsList.size() == 0)
+        {
+            std::cout << "║" << putInCenter("") << "║" << "\n";
+            std::cout << "║" << putInCenter("No Trains are scheduled!") << "║" << "\n";
+        }
+        else
         {
             for (auto train : allTrainsList)
             {
@@ -164,6 +164,14 @@ void printAllTrains(std::vector<Train *> allTrainsList, std::vector<int> positio
                 printTrainDetails(count, train);
                 count++;
             }
+        }
+    }
+    else
+    {
+        if (positions.size() == 0)
+        {
+            std::cout << "║" << putInCenter("") << "║" << "\n";
+            std::cout << "║" << putInCenter("No Trains are scheduled around that date!") << "║" << "\n";
         }
         else
         {
@@ -203,26 +211,26 @@ void printFlightDetails(int count, Flight *flight)
     std::cout << "║       ┌────────────────┬────────────┬────────────────────────────────┐       ║\n";
     std::cout << "║       │   Seat Type    │    Price   │     Total Seats(Available)     │       ║\n";
     std::cout << "║       ├────────────────┼────────────┼────────────────────────────────┤       ║\n";
-    std::cout << "║       │ Economy Class  │  Rs. 6000  │" + putLeftPaddingAndFillRight(std::to_string(flight->totalSeats[0]) + "(" + std::to_string(flight->totalSeats[0] - flight->bookedSeats[0]) + ")", 10, 32) << "│       ║\n";
-    std::cout << "║       │ Business Class │  Rs. 8000  │" + putLeftPaddingAndFillRight(std::to_string(flight->totalSeats[1]) + "(" + std::to_string(flight->totalSeats[1] - flight->bookedSeats[1]) + ")", 10, 32) << "│       ║\n";
+    std::cout << "║       │ Economy Class  │" << putInCenter("Rs. " + std::to_string(flight->seatPrices[0]), 12) << "│" + putLeftPaddingAndFillRight(std::to_string(flight->totalSeats[0]) + "(" + std::to_string(flight->totalSeats[0] - flight->bookedSeats[0]) + ")", 10, 32) << "│       ║\n";
+    std::cout << "║       │ Business Class │" << putInCenter("Rs. " + std::to_string(flight->seatPrices[1]), 12) << "│" + putLeftPaddingAndFillRight(std::to_string(flight->totalSeats[1]) + "(" + std::to_string(flight->totalSeats[1] - flight->bookedSeats[1]) + ")", 10, 32) << "│       ║\n";
     std::cout << "║       └────────────────┴────────────┴────────────────────────────────┘       ║\n";
 }
-void printAllFlights(std::vector<Flight *> allFlightsList, std::vector<int> positions = {})
+void printAllFlights(std::vector<Flight *> allFlightsList, bool printPositions = false, std::vector<int> positions = {})
 {
     system("cls");
     std::cout << "╔══════════════════════════════════════════════════════════════════════════════╗" << "\n";
     std::cout << "║" << putInCenter("All Available Flights") << "║" << "\n";
     std::cout << "╠══════════════════════════════════════════════════════════════════════════════╣" << "\n";
 
-    if (allFlightsList.size() == 0)
+    int count = 1;
+    if (!printPositions)
     {
-        std::cout << "║" << putInCenter("") << "║" << "\n";
-        std::cout << "║" << putInCenter("No Flights are available") << "║" << "\n";
-    }
-    else
-    {
-        int count = 1;
-        if (positions.size() == 0)
+        if (allFlightsList.size() == 0)
+        {
+            std::cout << "║" << putInCenter("") << "║" << "\n";
+            std::cout << "║" << putInCenter("No Flights are scheduled!") << "║" << "\n";
+        }
+        else
         {
             for (auto flight : allFlightsList)
             {
@@ -233,6 +241,14 @@ void printAllFlights(std::vector<Flight *> allFlightsList, std::vector<int> posi
                 printFlightDetails(count, flight);
                 count++;
             }
+        }
+    }
+    else
+    {
+        if (positions.size() == 0)
+        {
+            std::cout << "║" << putInCenter("") << "║" << "\n";
+            std::cout << "║" << putInCenter("No Flights are scheduled around that day!") << "║" << "\n";
         }
         else
         {

@@ -50,6 +50,10 @@ struct DateTime
     bool operator>=(const DateTime &other) const;
     // != operator
     bool operator!=(const DateTime &other) const;
+    // + operator
+    DateTime operator+(const DateTime &other) const;
+    // - operator
+    DateTime operator-(const DateTime &other) const;
 };
 struct ListNode
 {
@@ -124,7 +128,9 @@ private:
 
     bool isEmailRegistered(std::string email);
     void userDashboard();
-    void ticketBookingPanel(std::string transport);
+    void ticketBookingPanel();
+    void trainTicketBooking();
+    void flightTicketBooking();
     void cancelTicketPanel(std::string transport);
     void changeUserPassword();
     void changeUserName();
@@ -145,42 +151,49 @@ private:
 public:
     CSVManager() {}
     void loadAllUsers();
+    void saveNewUser(User *newUser);
     void saveAllUsers();
 
     void loadAllStations();
+    void saveNewStation(Terminal *newStation);
     void saveAllStations();
 
     void loadAllAirports();
+    void saveNewAirport(Terminal *newAirport);
     void saveAllAirports();
 
-    void loadAllFlights();
-    void saveAllFlights();
-
     void loadAllTrains();
+    void saveNewTrain(Train *newTrain);
     void saveAllTrains();
 
-    void loadAllFlightTickets();
-    void saveAllFlightTickets();
+    void loadAllFlights();
+    void saveNewFlight(Flight *newFlight);
+    void saveAllFlights();
 
     void loadAllTrainTickets();
+    void saveNewTrainTicket(TrainTicket *newTicket, std::string email);
     void saveAllTrainTickets();
+
+    void loadAllFlightTickets();
+    void saveNewFlightTicket(FlightTicket *newTicket, std::string email);
+    void saveAllFlightTickets();
 };
 
 class Ticket
 {
 public:
+    std::string pnr;
+    int seatChoice;
+    int price;
     DateTime *bookingDate;
     ListNode *boardingListNode;
     ListNode *destinationListNode;
-    std::string pnr;
-    int seatChoice;
     Ticket() {}
 };
 class FlightTicket : public Ticket
 {
 public:
     Flight *flightPtr;
-    int price = 0;
     FlightTicket() {}
     FlightTicket(int seatChoice, Flight *flightPtr, ListNode *boardingListNode, ListNode *destinationListNode, std::string pnr, DateTime *bookingDate);
 };
@@ -188,7 +201,6 @@ class TrainTicket : public Ticket
 {
 public:
     Train *trainPtr;
-    int price = 0;
     TrainTicket() {}
     TrainTicket(int seatChoice, Train *trainPtr, ListNode *boardingListNode, ListNode *destinationListNode, std::string pnr, DateTime *bookingDate);
 };
@@ -210,6 +222,7 @@ class Flight : public Transport
     std::string airlineName;
 
 public:
+    std::vector<int> seatPrices = {6000, 8000};
     Flight() : Transport() {}
     Flight(std::string name, std::string number, ListNode *coveringCities, std::vector<int> totalSeats) : Transport(name, number, coveringCities, totalSeats) {}
 };
@@ -218,6 +231,7 @@ class Train : public Transport
     std::string trainType;
 
 public:
+    std::vector<int> seatPrices = {4000, 3000, 2000, 1000};
     Train() : Transport() {}
     Train(std::string name, std::string number, ListNode *coveringCities, std::vector<int> totalSeats) : Transport(name, number, coveringCities, totalSeats) {}
 };
