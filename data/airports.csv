@@ -1,11 +1,11 @@
 Code,Name,City
-DEL,Indira Gandhi International Airport,Delhi
-BOM,Chhatrapati Shivaji Maharaj International Airport,Mumbai
-BLR,Kempegowda International Airport,Bengaluru
+PAT,Jay Prakash Narayan Airport,Patna
+GOI,Goa International Airport (Dabolim),Goa
+COK,Cochin International Airport,Kochi
+AMD,Sardar Vallabhbhai Patel International Airport,Ahmedabad
+MAA,Chennai International Airport,Chennai
 HYD,Rajiv Gandhi International Airport,Hyderabad
 CCU,Netaji Subhas Chandra Bose International Airport,Kolkata
-MAA,Chennai International Airport,Chennai
-AMD,Sardar Vallabhbhai Patel International Airport,Ahmedabad
-COK,Cochin International Airport,Kochi
-GOI,Goa International Airport (Dabolim),Goa
-PAT,Jay Prakash Narayan Airport,Patna
+BLR,Kempegowda International Airport,Bengaluru
+BOM,Chhatrapati Shivaji Maharaj International Airport,Mumbai
+DEL,Indira Gandhi International Airport,Delhi

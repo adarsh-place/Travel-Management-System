@@ -267,7 +267,7 @@ void printAllFlights(std::vector<Flight *> allFlightsList, bool printPositions =
     std::cout << "║" << putInCenter("") << "║" << "\n";
     std::cout << "╚══════════════════════════════════════════════════════════════════════════════╝" << "\n";
 }
-void printAllTerminals(std::string terminal, std::vector<Terminal *> allTerminals)
+void printAllTerminals(std::string terminal, std::unordered_map<std::string, Terminal *> &allTerminals)
 {
     system("cls");
     std::cout << "╔══════════════════════════════════════════════════════════════════════════════╗" << "\n";
@@ -285,7 +285,7 @@ void printAllTerminals(std::string terminal, std::vector<Terminal *> allTerminal
         std::cout << "║   ┌─────────────────────────────────────────────────────────────┬────────┐   ║\n";
         std::cout << "║   │                           Name,City                         │  Code  │   ║\n";
         std::cout << "║   ├─────────────────────────────────────────────────────────────┼────────┤   ║\n";
-        for (auto t : allTerminals)
+        for (auto [_, t] : allTerminals)
         {
             std::cout << "║   │" << putInCenter("", 61) << "│" << putInCenter("", 8) << "│   ║" << "\n";
             std::cout << "║   │" << putInCenter(t->name + "," + t->city, 61) << "│" << putInCenter(t->code, 8) << "│   ║\n";
@@ -296,8 +296,8 @@ void printAllTerminals(std::string terminal, std::vector<Terminal *> allTerminal
     std::cout << "║" << putInCenter("") << "║" << "\n";
     std::cout << "╚══════════════════════════════════════════════════════════════════════════════╝" << "\n";
 }
-void printTransportOrTerminalSelectionPanel(std::string transport, std::string terminal, std::vector<Train *> &allTrainsList,
-                                            std::vector<Flight *> &allFlightsList, std::vector<Terminal *> &terminalsList)
+void printTransportOrTerminalSelectionPanel(std::string transport, std::string terminal, std::vector<Train *> allTrainsList,
+                                            std::vector<Flight *> allFlightsList, std::unordered_map<std::string, Terminal *> terminalsList)
 {
     system("cls");
     std::cout << "╔══════════════════════════════════════════════════════════════════════════════╗" << "\n";
