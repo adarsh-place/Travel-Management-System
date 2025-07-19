@@ -406,12 +406,12 @@ void Admin::adminLoginPanel()
     std::vector<std::string> inputs = printLoginPanel("Admin");
     if (inputs[0] == this->email && inputs[1] == this->password)
     {
-        printAlert("Logged In Successfully");
+        printAlert("Logged In Successfully.");
         this->adminDashboard();
     }
     else
     {
-        printAlert("Login Failed.\n  Invalid Credentials");
+        printAlert("Login Failed!\nInvalid Credentials.");
     }
 }
 
@@ -527,33 +527,34 @@ void TrainAdmin::addNewTransport()
 
     transform(coveringCitiesCode.begin(), coveringCitiesCode.end(), coveringCitiesCode.begin(), ::toupper);
 
+    std::string failedMessage = "Failed to add Train!\n";
     if (stationsCount == -1)
     {
-        printAlert("Failed to add Train.\nCities count should be integer");
+        printAlert(failedMessage + "Cities count should be integer");
     }
     else if (name.size() == 0)
     {
-        printAlert("Failed to add Train.\nTrain Name is Required");
+        printAlert(failedMessage + "Train Name is Required");
     }
     else if (number.size() == 0)
     {
-        printAlert("Failed to add Train.\nTrain Number is Required");
+        printAlert(failedMessage + "Train Number is Required");
     }
     else if (!isOnlyAlphas(name, " "))
     {
-        printAlert("Failed to add Train.\nTrain Name can only have alphabets and underscores: " + name);
+        printAlert(failedMessage + "Train Name can only have alphabets and underscores: " + name);
     }
     else if (number.size() != 5 || !isOnlyDigits(number))
     {
-        printAlert("Failed to add Train.\nTrain Number is Invalid");
+        printAlert(failedMessage + "Train Number is Invalid");
     }
     else if (isTrainCodeExists(number))
     {
-        printAlert("Failed to add Train.\nTrain Number already exists.");
+        printAlert(failedMessage + "Train Number already exists.");
     }
     else if (!isOnlyDigits(totalSeats, " "))
     {
-        printAlert("Failed to add Train.\nNumber of seats is invalid");
+        printAlert(failedMessage + "Number of seats is invalid");
     }
     else
     {
@@ -562,14 +563,14 @@ void TrainAdmin::addNewTransport()
         std::vector<Terminal *> coveringStations;
         if (stationCodes.size() != stationsCount)
         {
-            printAlert("Failed to add Train.\nNo. of cities provided does not match cities count");
+            printAlert(failedMessage + "No. of cities provided does not match cities count");
             return;
         }
         for (std::string &stationCode : stationCodes)
         {
             if (!isStationCodeExists(stationCode))
             {
-                printAlert("Failed to add train\nA station does not exists: " + stationCode);
+                printAlert(failedMessage + "A station does not exists: " + stationCode);
                 return;
             }
             coveringStations.push_back(codeToStation[stationCode]);
@@ -580,7 +581,7 @@ void TrainAdmin::addNewTransport()
         std::vector<DateTime *> stationDTs;
         if (stationTimes.size() != stationsCount)
         {
-            printAlert("Failed to add Train.\nNo. of departure times provided does not match cities count");
+            printAlert(failedMessage + "No. of departure times provided does not match cities count");
             return;
         }
         // checking and storing destination times for each city
@@ -589,12 +590,12 @@ void TrainAdmin::addNewTransport()
             DateTime *DT = stringToDateTime(stationTimes[i]);
             if (DT == NULL)
             {
-                printAlert("Failed to add Train.\nA date time format is wrong : " + stationTimes[i]);
+                printAlert(failedMessage + "A date time format is wrong : " + stationTimes[i]);
                 return;
             }
             if (i > 0 && (*DT) <= (*stationDTs.back()))
             {
-                printAlert("Failed to add Train.\nA date time difference is equal or negative: " + stationTimes[i - 1] + " " + stationTimes[i]);
+                printAlert(failedMessage + "A date time difference is equal or negative: " + stationTimes[i - 1] + " " + stationTimes[i]);
                 return;
             }
             stationDTs.push_back(DT);
@@ -604,7 +605,7 @@ void TrainAdmin::addNewTransport()
         std::vector<int> seatsInInt = splitAsNums(totalSeats);
         if (seatsInInt.size() != 4)
         {
-            printAlert("Failed to add Train.\nSeats provided does not match.");
+            printAlert(failedMessage + "Seats provided does not match.");
             return;
         }
 
@@ -657,7 +658,7 @@ void TrainAdmin::removeTerminal()
 
     if (success)
     {
-        printAlert("Station removed successfully");
+        printAlert("Station removed successfully.");
     }
     else
     {
@@ -735,12 +736,12 @@ void FlightAdmin::adminDashboard()
     }
     case '6':
     {
-        printAlert("Logged Out Successfully");
+        printAlert("Logged Out Successfully.");
         return;
     }
     default:
     {
-        printAlert("Wrong Choice");
+        printAlert("Wrong Choice!");
         break;
     }
     }
@@ -814,25 +815,26 @@ void FlightAdmin::addNewTransport()
     transform(number.begin(), number.end(), number.begin(), ::toupper);
     transform(coveringCitiesCode.begin(), coveringCitiesCode.end(), coveringCitiesCode.begin(), ::toupper);
 
+    std::string failedMessage = "Failed to add Flight!\n";
     if (airportsCount == -1)
     {
-        printAlert("Failed to add Flight.\nCities count should be integer");
+        printAlert(failedMessage + "Cities count should be integer");
     }
     else if (name.size() == 0)
     {
-        printAlert("Failed to add Flight.\nFlight Name is Required");
+        printAlert(failedMessage + "Flight Name is Required");
     }
     else if (number.size() != 5 || !isOnlyDigitOrAlpha(number))
     {
-        printAlert("Failed to add Flight.\nFlight Number is Invalid");
+        printAlert(failedMessage + "Flight Number is Invalid");
     }
     else if (isFlightCodeExists(number))
     {
-        printAlert("Failed to add Flight.\nFlight Number already exists.");
+        printAlert(failedMessage + "Flight Number already exists.");
     }
     else if (!isOnlyDigits(totalSeats, " "))
     {
-        printAlert("Failed to add Flight.\nNumber of seat is invalid.");
+        printAlert(failedMessage + "Number of seat is invalid.");
     }
     else
     {
@@ -841,14 +843,14 @@ void FlightAdmin::addNewTransport()
         std::vector<Terminal *> coveringAirports;
         if (airportCodes.size() != airportsCount)
         {
-            printAlert("Failed to add Flight.\nNo. of cities provided does not match cities count.");
+            printAlert(failedMessage + "No. of cities provided does not match cities count.");
             return;
         }
         for (std::string &airportCode : airportCodes)
         {
             if (!isAirportCodeExists(airportCode))
             {
-                printAlert("Failed to add Flight\nAn airport does not exists: " + airportCode);
+                printAlert(failedMessage + "An airport does not exists: " + airportCode);
                 return;
             }
             coveringAirports.push_back(codeToAirport[airportCode]);
@@ -859,7 +861,7 @@ void FlightAdmin::addNewTransport()
         std::vector<DateTime *> airportDTs;
         if (airportTimes.size() != airportsCount)
         {
-            printAlert("Failed to add Train.\nNo. of departure times provided does not match cities count.");
+            printAlert(failedMessage + "No. of departure times provided does not match cities count.");
             return;
         }
         // checking and storing destination times for each city
@@ -868,12 +870,12 @@ void FlightAdmin::addNewTransport()
             DateTime *DT = stringToDateTime(airportTimes[i]);
             if (DT == NULL)
             {
-                printAlert("Failed to add Train.\nA date time format is wrong : " + airportTimes[i]);
+                printAlert(failedMessage + "A date time format is wrong : " + airportTimes[i]);
                 return;
             }
             if (i > 0 && (*DT) <= (*airportDTs.back()))
             {
-                printAlert("Failed to add Train.\nA date time difference is equal or negative: " + airportTimes[i - 1] + " " + airportTimes[i]);
+                printAlert(failedMessage + "A date time difference is equal or negative: " + airportTimes[i - 1] + " " + airportTimes[i]);
                 return;
             }
             airportDTs.push_back(DT);
@@ -883,7 +885,7 @@ void FlightAdmin::addNewTransport()
         std::vector<int> seatsInInt = splitAsNums(totalSeats);
         if (seatsInInt.size() != airportsCount)
         {
-            printAlert("Failed to add Flight.\nSeats provided does not match.");
+            printAlert(failedMessage + "Seats provided does not match.");
             return;
         }
 
@@ -936,11 +938,11 @@ void FlightAdmin::removeTerminal()
 
     if (success)
     {
-        printAlert("Airport removed successfully");
+        printAlert("Airport removed successfully.");
     }
     else
     {
-        printAlert("Failed to remove Airport.\n" + message);
+        printAlert("Failed to remove Airport!\n" + message);
     }
 }
 void FlightAdmin::removeTransport()
@@ -978,7 +980,7 @@ void FlightAdmin::removeTransport()
     }
     else
     {
-        printAlert("Failed to remove Flight.\n" + message);
+        printAlert("Failed to remove Flight!\n" + message);
     }
 }
 
@@ -1024,28 +1026,31 @@ User *UserManager::findUser(std::string email)
 void UserManager::userRegistrationPanel()
 {
     std::vector<std::string> inputs = printUserRegistrationPanel();
+
     std::string message;
+    bool success = false;
+
     if (inputs[0].size() == 0)
     {
-        message = "Registration Failed.\nName is required.";
+        message = "Name is required.";
     }
     else if (inputs[1].size() == 0)
     {
-        message = "Registration Failed.\nEmail is required";
+        message = "Email is required.";
     }
     else if (inputs[2].size() == 0)
     {
-        message = "Registration Failed.\nPassword is required";
+        message = "Password is required.";
     }
     else if (inputs[2] != inputs[3])
     {
-        message = "Registration Failed.\nPassword and confirm password do no match";
+        message = "Password and confirm password does not match.";
     }
     else
     {
         if (this->isEmailRegistered(inputs[1]))
         {
-            message = "Registration Failed.\nUser Email already exists.";
+            message = "User Email already exists.";
         }
         else
         {
@@ -1053,24 +1058,33 @@ void UserManager::userRegistrationPanel()
             allUsersList.push_back(newUser);
             // writing into file
             csvManager->saveNewUser(newUser);
-            message = "You are successfully registered.";
+            success = true;
         }
     }
 
-    printAlert(message);
+    if (success)
+    {
+        printAlert("You are successfully registered.");
+    }
+    else
+    {
+        printAlert("Registration Failed!\n" + message);
+    }
 }
 void UserManager::userLoginPanel()
 {
     std::vector<std::string> inputs = printLoginPanel("User");
 
     std::string message;
+    bool success = false;
+
     if (inputs[0].size() == 0)
     {
-        printAlert("Login Failed.\nEmail is required.");
+        message = "Email is required.";
     }
     else if (inputs[1].size() == 0)
     {
-        printAlert("Login Failed.\nPassword is required.");
+        message = "Password is required.";
     }
     else
     {
@@ -1078,13 +1092,22 @@ void UserManager::userLoginPanel()
         if (tempPtr != NULL && inputs[1] == tempPtr->getPassword())
         {
             loggedInUser = tempPtr;
-            printAlert("Logged In successfully");
-            this->userDashboard();
+            success = true;
         }
         else
         {
-            printAlert("Login Failed\nInvalid Credentials");
+            message = "Invalid Credentials";
         }
+    }
+
+    if (success)
+    {
+        printAlert("Logged In successfully.");
+        this->userDashboard();
+    }
+    else
+    {
+        printAlert("Login Failed!\n" + message);
     }
 }
 void UserManager::userDashboard()
@@ -1132,7 +1155,7 @@ void UserManager::userDashboard()
         }
         default:
         {
-            printAlert("Wrong Choice");
+            printAlert("Wrong Choice!");
             break;
         }
         }
@@ -1160,7 +1183,7 @@ void UserManager::userDashboard()
         }
         default:
         {
-            printAlert("Wrong Choice");
+            printAlert("Wrong Choice!");
             break;
         }
         }
@@ -1179,12 +1202,12 @@ void UserManager::userDashboard()
     case 'c':
     {
         loggedInUser = NULL;
-        printAlert("Logged Out Successfully");
+        printAlert("Logged Out Successfully.");
         return;
     }
     default:
     {
-        printAlert("Wrong Choice");
+        printAlert("Wrong Choice!");
         break;
     }
     }
@@ -1212,7 +1235,7 @@ void UserManager::ticketBookingPanel()
     }
     deafult:
     {
-        printAlert("Wrong Choice");
+        printAlert("Wrong Choice!");
         this->ticketBookingPanel();
     }
     }
@@ -1222,13 +1245,17 @@ void UserManager::trainTicketBooking()
     std::vector<std::string> inputs = printTicketBookingPanel("Train");
     inputs[2] += "-00:00";
     DateTime *journeyDate = stringToDateTime(inputs[2]);
+
+    std::string message;
+    bool success = false;
+
     if (journeyDate == NULL)
     {
-        printAlert("Booking Failed\nInvalid Journey Date");
+        message = "Invalid Journey Date";
     }
     else if (!isOnlyAlphas(inputs[0]) || inputs[0].size() > 4 || !isOnlyAlphas(inputs[1]) || inputs[1].size() > 4)
     {
-        printAlert("Booking Failed\nInvalid Code.");
+        message = "Invalid Code.";
     }
     else
     {
@@ -1252,7 +1279,7 @@ void UserManager::trainTicketBooking()
         int trainChoice = inputNumber("Enter Train Choice: ");
         if (trainChoice < 0 || trainChoice > filteredTrainsCode.size())
         {
-            printAlert("Booking Failed.\nInvalid Choice.");
+            message = "Invalid Choice.";
         }
         else
         {
@@ -1265,12 +1292,12 @@ void UserManager::trainTicketBooking()
             int seatChoice = inputNumber();
             if (seatChoice < 0 || seatChoice > 5)
             {
-                printContinue("Invalid Choice");
+                printContinue("Invalid Choice!");
                 goto trainSeatSelectionCheckPoint;
             }
             else if (seatChoice == 5)
             {
-                printAlert("Booking Canceled");
+                message = "Booking Canceled.";
             }
             else
             {
@@ -1285,14 +1312,23 @@ void UserManager::trainTicketBooking()
                     choosenTrain->bookedSeats[seatChoice]++;
                     // write in file;
                     csvManager->saveNewTrainTicket(newTicket, this->loggedInUser->email);
-                    printAlert("Seat Booked Successfully.");
+                    success = true;
                 }
                 else
                 {
-                    printAlert("Booking Failed.\nNo seats Available");
+                    message = "All seats of this class were booked.";
                 }
             }
         }
+    }
+
+    if (success)
+    {
+        printAlert("Seat Booked Successfully.");
+    }
+    else
+    {
+        printAlert("Booking Failed!\n" + message);
     }
 }
 void UserManager::flightTicketBooking()
@@ -1300,13 +1336,17 @@ void UserManager::flightTicketBooking()
     std::vector<std::string> inputs = printTicketBookingPanel("Flight");
     inputs[2] += "-00:00";
     DateTime *journeyDate = stringToDateTime(inputs[2]);
+
+    std::string message;
+    bool success = false;
+
     if (journeyDate == NULL)
     {
-        printAlert("Booking Failed\nInvalid Journey Date");
+        message = "Invalid Journey Date";
     }
     else if (!isOnlyAlphas(inputs[0]) || inputs[0].size() > 4 || !isOnlyAlphas(inputs[1]) || inputs[1].size() > 4)
     {
-        printAlert("Booking Failed\nInvalid Code.");
+        message = "Invalid Code.";
     }
     else
     {
@@ -1330,7 +1370,7 @@ void UserManager::flightTicketBooking()
         int flightChoice = inputNumber("Enter Flight Choice: ");
         if (flightChoice < 0 || flightChoice > filteredFlightsCode.size())
         {
-            printAlert("Booking Failed.\nInvalid Choice.");
+            message = "Invalid Choice.";
         }
         else
         {
@@ -1343,12 +1383,12 @@ void UserManager::flightTicketBooking()
             int seatChoice = inputNumber();
             if (seatChoice < 0 || seatChoice > 3)
             {
-                printContinue("Invalid Choice");
+                printContinue("Invalid Choice!");
                 goto flightSeatSelectionCheckPoint;
             }
             else if (seatChoice == 3)
             {
-                printAlert("Booking Canceled");
+                message = "Booking Canceled!";
             }
             else
             {
@@ -1363,14 +1403,23 @@ void UserManager::flightTicketBooking()
                     choosenFlight->bookedSeats[seatChoice]++;
                     // write in file;
                     csvManager->saveNewFlightTicket(newTicket, this->loggedInUser->email);
-                    printAlert("Seat Booked Successfully.");
+                    success = true;
                 }
                 else
                 {
-                    printAlert("Booking Failed.\nNo seats Available");
+                    message = "All seats in this class were booked.";
                 }
             }
         }
+    }
+
+    if (success)
+    {
+        printAlert("Seat Booked Successfully.");
+    }
+    else
+    {
+        printAlert("Booking Failed!" + message);
     }
 }
 void UserManager::cancelTicketPanel(std::string transport)
@@ -1387,6 +1436,9 @@ void UserManager::cancelTicketPanel(std::string transport)
         ticketsCt = this->loggedInUser->flightTickets.size();
     }
 
+    bool success = false;
+    std::string message;
+
     if (ticketsCt == 0)
     {
         printContinue();
@@ -1396,7 +1448,7 @@ void UserManager::cancelTicketPanel(std::string transport)
         int ticketChoice = inputNumber("Enter choice number to cancel ticket: ");
         if (ticketChoice < 0 || ticketChoice > ticketsCt)
         {
-            printAlert("Failed to cancel Ticket.\nInvalid Choice.");
+            message = "Invalid Choice!";
         }
         else
         {
@@ -1425,41 +1477,59 @@ void UserManager::cancelTicketPanel(std::string transport)
                 csvManager->saveAllFlightTickets();
                 delete (fT);
             }
-            printAlert("Ticket Canceled Successfully.");
+            success = true;
         }
+    }
+
+    if (success)
+    {
+        printAlert("Ticket Canceled Successfully.");
+    }
+    else
+    {
+        printAlert("Failed to cancel Ticket!\n" + message);
     }
 }
 void UserManager::changeUserPassword()
 {
     std::vector<std::string> info = printChangePasswordPanel();
     std::string message;
+    bool success = false;
     if (info[1].size() == 0)
     {
-        message = "Password is required";
+        message = "Password is required.";
     }
     else if (info[1] != info[2])
     {
-        message = "New password and Confirm password does not match";
+        message = "New password and Confirm password does not match.";
     }
     else if (info[0] != this->loggedInUser->getPassword())
     {
-        message = "Invalid Old Password";
+        message = "Wrong Old Password.";
     }
     else
     {
         loggedInUser->setPassword(info[1]);
         // writing in file
         csvManager->saveAllUsers();
-        message = "Password Changed Successfully";
+        success = true;
     }
-    printAlert(message);
+
+    if (success)
+    {
+        printAlert("Password Changed Successfully");
+    }
+    else
+    {
+        printAlert("Failed to change password!\n" + message);
+    }
 }
 void UserManager::changeUserName()
 {
     std::string newName = printChangeNamePanel(this->loggedInUser->fullName);
     std::string message;
     if (newName.size() == 0)
-        message = "Name is required";
+        message = "Failed to change name!\nName is required.";
     else
     {
         this->loggedInUser->fullName = newName;
@@ -2205,7 +2275,7 @@ void ControlPanel()
         }
         default:
         {
-            printAlert("Wrong Choice");
+            printAlert("Wrong Choice!");
             break;
         }
         }
@@ -2218,7 +2288,7 @@ void ControlPanel()
     }
     default:
     {
-        printAlert("Wrong Choice");
+        printAlert("Wrong Choice!");
         break;
     }
     }

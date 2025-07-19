@@ -19,24 +19,52 @@ std::string putLeftPaddingAndFillRight(std::string str, int padding = 0, int wid
     str = std::string(padding, ' ') + str + std::string(width - str.size() - padding, ' ');
     return str;
 }
+void hideCursor()
+{
+    std::cout << "\033[?25l";
+}
+void showCursor()
+{
+    std::cout << "\033[?25h";
+}
 
 void printContinue(std::string message = "")
 {
-    std::cout << "  " << message << "\n  Press any key to continue.";
+    hideCursor();
+    std::cout << '\n';
+    std::cout << "--------------------------------------------------------------------------------" << "\n";
+    if (message.size() != 0)
+        std::cout << "  " << message << '\n';
+    std::cout << "  Press any key to continue...\n";
     _getch();
+    showCursor();
 }
-void printAlert(std::string message)
+void printAlert(std::string messages)
 {
     system("cls");
-    std::cout << "  " << message << "\n";
+    std::cout << "╔══════════════════════════════════════════════════════════════════════════════╗" << "\n";
+    std::cout << "║" << putInCenter("Alert!") << "║" << "\n";
+    std::cout << "╚══════════════════════════════════════════════════════════════════════════════╝" << "\n";
+    std::cout << '\n';
+    std::stringstream ss(messages);
+    std::string line;
+    while (std::getline(ss, line))
+    {
+        std::cout << putInCenter(line, 80) << '\n';
+    }
     printContinue();
 }
 void printExit()
 {
     system("cls");
     std::cout << "╔══════════════════════════════════════════════════════════════════════════════╗" << "\n";
-    std::cout << "║" << putInCenter("Thank you for visiting") << "║" << "\n";
+    std::cout << "║" << putInCenter("") << "║" << "\n";
+    std::cout << "║" << putInCenter("Thank you for visiting!") << "║" << "\n";
+    std::cout << "║" << putInCenter("") << "║" << "\n";
+    std::cout << "║" << putInCenter("Happy Travel 😊", 80) << "║" << "\n";
+    std::cout << "║" << putInCenter("") << "║" << "\n";
     std::cout << "╚══════════════════════════════════════════════════════════════════════════════╝" << "\n";
+    std::cout << '\n';
 }
 
 char inputUserChoice(std::string text = "Enter choice: ")
@@ -335,7 +363,7 @@ void printTransportOrTerminalSelectionPanel(std::string transport, std::string t
     }
     default:
     {
-        printAlert("Wrong Choice");
+        printAlert({"Wrong Choice!"});
         break;
     }
     }
