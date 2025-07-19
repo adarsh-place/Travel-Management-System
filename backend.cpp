@@ -6,8 +6,8 @@ const std::string flight_admin_password = "flightadmin@123";
 const std::string train_admin_email = "trainadmin@gmail.com";
 const std::string train_admin_password = "trainadmin@123";
 
-std::vector<Train *> allTrainsList;
-std::vector<Flight *> allFlightsList;
+std::unordered_map<std::string, Train *> codeToTrain;
+std::unordered_map<std::string, Flight *> codeToFlight;
 std::unordered_map<std::string, Terminal *> codeToStation;
 std::unordered_map<std::string, Terminal *> codeToAirport;
 std::vector<User *> allUsersList;
@@ -139,84 +139,67 @@ bool isAirportCodeExists(std::string airportCode)
         return false;
     return true;
 }
-int numberToTransportPosition(std::string transport, std::string &number)
+bool isTrainCodeExists(std::string trainCode)
 {
-    int pos = 0;
-    if (transport == "Train")
-    {
-        for (auto *t : allTrainsList)
-        {
-            if (t->number == number)
-                return pos;
-            pos++;
-        }
-    }
-    else
-    {
-        for (auto *f : allFlightsList)
-        {
-            if (f->number == number)
-                return pos;
-            pos++;
-        }
-    }
-    return -1;
+    if (codeToTrain.count(trainCode) == 0)
+        return false;
+    return true;
 }
-std::pair<ListNode *, ListNode *> terminalsInTransportRoute(ListNode *coveringCities, std::string &boardingTerminalCode, std::string &destinationTerminalCode)
+bool isFlightCodeExists(std::string flightCode)
+{
+    if (codeToFlight.count(flightCode) == 0)
+        return false;
+    return true;
+}
+
+ListNode *terminalInTransportRoute(ListNode *coveringCities, std::string &terminalCode)
 {
     while (coveringCities != NULL)
     {
-        if (coveringCities->currentTerminal.code == boardingTerminalCode)
+        if (coveringCities->currentTerminal.code == terminalCode)
         {
-            ListNode *temp = coveringCities;
-            coveringCities = coveringCities->next;
-            while (coveringCities != NULL)
-            {
-                if (coveringCities->currentTerminal.code == destinationTerminalCode)
-                    return {temp, coveringCities};
-                coveringCities = coveringCities->next;
-            }
-            return {NULL, NULL};
+            return coveringCities;
         }
         coveringCities = coveringCities->next;
     }
-    return {NULL, NULL};
+    return NULL;
 }
-std::tuple<std::vector<int>, std::vector<std::pair<ListNode *, ListNode *>>> filterTransportsForUser(std::string transport, std::string &boardingTerminalCode, std::string &destinationTerminalCode, DateTime journeyDate)
+std::tuple<std::vector<std::string>, std::vector<std::pair<ListNode *, ListNode *>>> filterTransportsForUser(std::string transport, std::string &boardingTerminalCode, std::string &destinationTerminalCode, DateTime journeyDate)
 {
-    std::vector<int> positions;
+    std::vector<std::string> positions;
     std::vector<std::pair<ListNode *, ListNode *>> citiesList;
 
-    std::string oneDay = "01/00/00-12:00";
-    DateTime *diff = stringToDateTime(oneDay);
+    std::string oneAndHalfDay = "01/00/00-12:00";
+    DateTime *diff = stringToDateTime(oneAndHalfDay);
     DateTime validLowDate = journeyDate - (*diff);
     DateTime validHighDate = journeyDate + (*diff);
 
-    int position = 0;
+    auto temp = [&](ListNode *node, std::string number)
+    {
+        auto boardingTerminal = terminalInTransportRoute(node, boardingTerminalCode);
+        if (boardingTerminal != NULL && validLowDate <= boardingTerminal->departureTime && validHighDate >= boardingTerminal->departureTime)
+        {
+            auto destinationTerminal = terminalInTransportRoute(boardingTerminal, destinationTerminalCode);
+            if (destinationTerminal != NULL)
+            {
+                positions.push_back(number);
+                citiesList.push_back({boardingTerminal, destinationTerminal});
+            }
+        }
+    };
+
     if (transport == "Train")
     {
-        for (auto t : allTrainsList)
+        for (auto &[_, t] : codeToTrain)
         {
-            auto cities = terminalsInTransportRoute(t->coveringCities, boardingTerminalCode, destinationTerminalCode);
-            if (cities.first != NULL && validLowDate <= cities.first->departureTime && validHighDate >= cities.first->departureTime)
-            {
-                positions.push_back(position);
-                citiesList.push_back(cities);
-            }
-            position++;
+            temp(t->coveringCities, t->number);
         }
     }
     else
     {
-        for (auto t : allFlightsList)
+        for (auto &[_, f] : codeToFlight)
         {
-            auto cities = terminalsInTransportRoute(t->coveringCities, boardingTerminalCode, destinationTerminalCode);
-            if (cities.first != NULL && validLowDate <= cities.first->departureTime && validHighDate >= cities.first->departureTime)
-            {
-                positions.push_back(position);
-                citiesList.push_back(cities);
-            }
-            position++;
+            temp(f->coveringCities, f->number);
         }
     }
     return {positions, citiesList};
@@ -441,7 +424,7 @@ void TrainAdmin::adminDashboard()
     {
     case '1':
     {
-        printTransportOrTerminalSelectionPanel("Trains", "Stations", allTrainsList, allFlightsList, codeToStation);
+        printTransportOrTerminalSelectionPanel("Trains", "Stations", codeToTrain, codeToFlight, codeToStation);
         break;
     }
     case '2':
@@ -564,7 +547,7 @@ void TrainAdmin::addNewTransport()
     {
         printAlert("Failed to add Train.\nTrain Number is Invalid");
     }
-    else if (numberToTransportPosition("Train", number) != -1)
+    else if (isTrainCodeExists(number))
     {
         printAlert("Failed to add Train.\nTrain Number already exists.");
     }
@@ -637,7 +620,7 @@ void TrainAdmin::addNewTransport()
         }
 
         Train *newTrain = new Train(name, number, coveringCities->next, seatsInInt);
-        allTrainsList.push_back(newTrain);
+        codeToTrain[number] = newTrain;
         // writing in file
         csvManager->saveNewTrain(newTrain);
         printAlert("Train added successfully");
@@ -695,10 +678,9 @@ void TrainAdmin::removeTransport()
     }
     else
     {
-        int trainPosition = numberToTransportPosition("Train", trainNumber);
-        if (trainPosition != -1)
+        if (isTrainCodeExists(trainNumber))
         {
-            allTrainsList.erase(allTrainsList.begin() + trainPosition);
+            codeToTrain.erase(trainNumber);
             // writing into file
             csvManager->saveAllTrains();
             success = true;
@@ -728,7 +710,7 @@ void FlightAdmin::adminDashboard()
     {
     case '1':
     {
-        printTransportOrTerminalSelectionPanel("Flights", "Airports", allTrainsList, allFlightsList, codeToAirport);
+        printTransportOrTerminalSelectionPanel("Flights", "Airports", codeToTrain, codeToFlight, codeToAirport);
         break;
     }
     case '2':
@@ -844,7 +826,7 @@ void FlightAdmin::addNewTransport()
     {
         printAlert("Failed to add Flight.\nFlight Number is Invalid");
     }
-    else if (numberToTransportPosition("Flight", number) != -1)
+    else if (isFlightCodeExists(number))
     {
         printAlert("Failed to add Flight.\nFlight Number already exists.");
     }
@@ -917,7 +899,7 @@ void FlightAdmin::addNewTransport()
         }
 
         Flight *newFlight = new Flight(name, number, coveringCities->next, seatsInInt);
-        allFlightsList.push_back(newFlight);
+        codeToFlight[number] = newFlight;
         // write in file
         csvManager->saveNewFlight(newFlight);
         printAlert("Flight added successfully");
@@ -977,10 +959,9 @@ void FlightAdmin::removeTransport()
     }
     else
     {
-        int flightPosition = numberToTransportPosition("Flight", flightNumber);
-        if (flightPosition != -1)
+        if (isFlightCodeExists(flightNumber))
         {
-            allFlightsList.erase(allFlightsList.begin() + flightPosition);
+            codeToFlight.erase(flightNumber);
             // writing into file
             csvManager->saveAllFlights();
             success = true;
@@ -1015,7 +996,6 @@ void User::setPassword(std::string newPassword)
 UserManager::UserManager()
 {
     this->loggedInUser = NULL;
-    // load all users data from file;
 }
 bool UserManager::isEmailRegistered(std::string email)
 {
@@ -1115,12 +1095,12 @@ void UserManager::userDashboard()
     {
     case '1':
     {
-        printTransportOrTerminalSelectionPanel("Trains", "Stations", allTrainsList, allFlightsList, codeToStation);
+        printTransportOrTerminalSelectionPanel("Trains", "Stations", codeToTrain, codeToFlight, codeToStation);
         break;
     }
     case '2':
     {
-        printTransportOrTerminalSelectionPanel("Flights", "Airports", allTrainsList, allFlightsList, codeToAirport);
+        printTransportOrTerminalSelectionPanel("Flights", "Airports", codeToTrain, codeToFlight, codeToAirport);
         break;
     }
     case '3':
@@ -1256,13 +1236,13 @@ void UserManager::trainTicketBooking()
         transform(inputs[1].begin(), inputs[1].end(), inputs[1].begin(), ::toupper);
 
         // search for Train;
-        auto [filteredTrainsPosition, fromToList] = filterTransportsForUser("Train", inputs[0], inputs[1], *journeyDate);
+        auto [filteredTrainsCode, fromToList] = filterTransportsForUser("Train", inputs[0], inputs[1], *journeyDate);
 
         // showing all available trains
-        printAllTrains(allTrainsList, true, filteredTrainsPosition);
+        printAllTrains(codeToTrain, true, filteredTrainsCode);
 
         // If no trains are available then return
-        if (filteredTrainsPosition.size() == 0)
+        if (filteredTrainsCode.size() == 0)
         {
             printContinue();
             return;
@@ -1270,14 +1250,14 @@ void UserManager::trainTicketBooking()
 
         // taking user's train choice
         int trainChoice = inputNumber("Enter Train Choice: ");
-        if (trainChoice < 0 || trainChoice > filteredTrainsPosition.size())
+        if (trainChoice < 0 || trainChoice > filteredTrainsCode.size())
         {
             printAlert("Booking Failed.\nInvalid Choice.");
         }
         else
         {
             trainChoice--;
-            Train *choosenTrain = allTrainsList[filteredTrainsPosition[trainChoice]];
+            Train *choosenTrain = codeToTrain[filteredTrainsCode[trainChoice]];
             std::string trainName = choosenTrain->name;
 
         trainSeatSelectionCheckPoint:
@@ -1334,13 +1314,13 @@ void UserManager::flightTicketBooking()
         transform(inputs[1].begin(), inputs[1].end(), inputs[1].begin(), ::toupper);
 
         // search for Flight
-        auto [filteredFlightsPosition, fromToList] = filterTransportsForUser("Flight", inputs[0], inputs[1], *journeyDate);
+        auto [filteredFlightsCode, fromToList] = filterTransportsForUser("Flight", inputs[0], inputs[1], *journeyDate);
 
         // showing all available flights
-        printAllFlights(allFlightsList, true, filteredFlightsPosition);
+        printAllFlights(codeToFlight, true, filteredFlightsCode);
 
         // If no flights are available then return
-        if (filteredFlightsPosition.size() == 0)
+        if (filteredFlightsCode.size() == 0)
         {
             printContinue();
             return;
@@ -1348,14 +1328,14 @@ void UserManager::flightTicketBooking()
 
         // taking user's flight choice
         int flightChoice = inputNumber("Enter Flight Choice: ");
-        if (flightChoice < 0 || flightChoice > filteredFlightsPosition.size())
+        if (flightChoice < 0 || flightChoice > filteredFlightsCode.size())
         {
             printAlert("Booking Failed.\nInvalid Choice.");
         }
         else
         {
             flightChoice--;
-            Flight *choosenFlight = allFlightsList[filteredFlightsPosition[flightChoice]];
+            Flight *choosenFlight = codeToFlight[filteredFlightsCode[flightChoice]];
             std::string flightName = choosenFlight->name;
 
         flightSeatSelectionCheckPoint:
@@ -1713,7 +1693,7 @@ void CSVManager ::loadAllFlights()
                 movingPtr->departureTime = *stringToDateTime(cityTimes[i]);
             }
 
-            allFlightsList.push_back(new Flight(name, number, citiesList->next, totalSeats));
+            codeToFlight[number] = new Flight(name, number, citiesList->next, totalSeats);
         }
     }
 
@@ -1764,7 +1744,7 @@ void CSVManager ::loadAllTrains()
                 movingPtr->departureTime = *stringToDateTime(departureTimes[i]);
             }
 
-            allTrainsList.push_back(new Train(name, number, citiesList->next, totalSeats));
+            codeToTrain[number] = new Train(name, number, citiesList->next, totalSeats);
         }
     }
 
@@ -1802,21 +1782,20 @@ void CSVManager ::loadAllFlightTickets()
             std::getline(ss, seatChoice, ',') &&
             std::getline(ss, bookigDate, ','))
         {
-            User *user = userManager->findUser(email);
-            int flightPosition = numberToTransportPosition("Flight", flightNumber);
-            if (flightPosition == -1)
+            if (!isFlightCodeExists(flightNumber))
                 continue;
-            Flight *flight = allFlightsList[flightPosition];
+            Flight *flight = codeToFlight[flightNumber];
+            ListNode *boardingTerminal = terminalInTransportRoute(flight->coveringCities, boarding);
+            ListNode *destinationTerminal = terminalInTransportRoute(boardingTerminal, destination);
+            if (boardingTerminal == NULL || destinationTerminal == NULL)
+                continue;
+
+            User *user = userManager->findUser(email);
             int seatType = stoi(seatChoice);
             DateTime *bookingDateTime = stringToDateTime(bookigDate);
-            auto terminals = terminalsInTransportRoute(flight->coveringCities, boarding, destination);
 
-            if (terminals.first == NULL)
-                continue;
-
+            user->flightTickets.push_back(new FlightTicket(seatType, flight, boardingTerminal, destinationTerminal, pnr, bookingDateTime));
             flight->bookedSeats[seatType]++;
-
-            user->flightTickets.push_back(new FlightTicket(seatType, flight, terminals.first, terminals.second, pnr, bookingDateTime));
         }
     }
 
@@ -1854,21 +1833,21 @@ void CSVManager ::loadAllTrainTickets()
             std::getline(ss, seatChoice, ',') &&
             std::getline(ss, bookigDate, ','))
         {
-            User *user = userManager->findUser(email);
-            int trainPosition = numberToTransportPosition("Train", trainNumber);
-            if (trainPosition == -1)
+            if (!isTrainCodeExists(trainNumber))
                 continue;
-            Train *train = allTrainsList[trainPosition];
+            Train *train = codeToTrain[trainNumber];
+            User *user = userManager->findUser(email);
+            ListNode *boardingTerminal = terminalInTransportRoute(train->coveringCities, boarding);
+            ListNode *destinationTerminal = terminalInTransportRoute(boardingTerminal, destination);
+            if (boardingTerminal == NULL || destinationTerminal == NULL)
+                continue;
+
             int seatType = stoi(seatChoice);
             DateTime *bookingDateTime = stringToDateTime(bookigDate);
-            auto terminals = terminalsInTransportRoute(train->coveringCities, boarding, destination);
-
-            if (terminals.first == NULL)
-                continue;
+            auto terminals = terminalInTransportRoute(train->coveringCities, boarding);
 
             train->bookedSeats[seatType]++;
-
-            user->trainTickets.push_back(new TrainTicket(seatType, train, terminals.first, terminals.second, pnr, bookingDateTime));
+            user->trainTickets.push_back(new TrainTicket(seatType, train, boardingTerminal, destinationTerminal, pnr, bookingDateTime));
         }
     }
 
@@ -2009,7 +1988,7 @@ void CSVManager ::saveAllTrains()
     // Write header
     file << "Number,Name,Total Seats,Covering City Codes,Departure Times\n";
 
-    for (const auto &train : allTrainsList)
+    for (const auto &[_, train] : codeToTrain)
     {
         std::string totalSeats = join(train->totalSeats, '|');
         auto coveringCities = join(train->coveringCities, '|');
@@ -2055,7 +2034,7 @@ void CSVManager ::saveAllFlights()
     // Write header
     file << "Number,Name,Total Seats,Covering City Codes,Departure Times\n";
 
-    for (const auto &flight : allFlightsList)
+    for (const auto &[_, flight] : codeToFlight)
     {
         std::string totalSeats = join(flight->totalSeats, '|');
         auto coveringCities = join(flight->coveringCities, '|');
@@ -2186,12 +2165,12 @@ void ControlPanel()
     {
     case '1':
     {
-        printTransportOrTerminalSelectionPanel("Trains", "Stations", allTrainsList, allFlightsList, codeToStation);
+        printTransportOrTerminalSelectionPanel("Trains", "Stations", codeToTrain, codeToFlight, codeToStation);
         break;
     }
     case '2':
     {
-        printTransportOrTerminalSelectionPanel("Flights", "Airports", allTrainsList, allFlightsList, codeToAirport);
+        printTransportOrTerminalSelectionPanel("Flights", "Airports", codeToTrain, codeToFlight, codeToAirport);
         break;
     }
     case '3':
@@ -2253,9 +2232,9 @@ void cleanMemory()
         delete t;
     for (const auto &[_, t] : codeToAirport)
         delete t;
-    for (auto t : allTrainsList)
+    for (const auto &[_, t] : codeToTrain)
         delete t;
-    for (auto t : allFlightsList)
+    for (const auto &[_, t] : codeToFlight)
         delete t;
 
     // delete all listnode pointers in train
@@ -2264,8 +2243,11 @@ void cleanMemory()
 
     codeToStation.clear();
     codeToAirport.clear();
+    codeToTrain.clear();
+    codeToFlight.clear();
 
-    delete (flightAdmin);
-    delete (trainAdmin);
-    delete (userManager);
+    delete flightAdmin;
+    delete trainAdmin;
+    delete userManager;
+    delete csvManager;
 }

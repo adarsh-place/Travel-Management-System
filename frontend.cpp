@@ -138,7 +138,7 @@ void printTrainDetails(int count, Train *train)
     std::cout << "║       │  Sleeper Class │" << putInCenter("Rs. " + std::to_string(train->seatPrices[3]), 12) << "│" + putLeftPaddingAndFillRight(std::to_string(train->totalSeats[3]) + "(" + std::to_string(train->totalSeats[3] - train->bookedSeats[3]) + ")", 10, 32) << "│       ║\n";
     std::cout << "║       └────────────────┴────────────┴────────────────────────────────┘       ║\n";
 }
-void printAllTrains(std::vector<Train *> allTrainsList, bool printPositions = false, std::vector<int> positions = {})
+void printAllTrains(std::unordered_map<std::string, Train *> codeToTrain, bool printPositions = false, std::vector<std::string> positions = {})
 {
     system("cls");
     std::cout << "╔══════════════════════════════════════════════════════════════════════════════╗" << "\n";
@@ -148,14 +148,14 @@ void printAllTrains(std::vector<Train *> allTrainsList, bool printPositions = fa
     int count = 1;
     if (!printPositions)
     {
-        if (allTrainsList.size() == 0)
+        if (codeToTrain.size() == 0)
         {
             std::cout << "║" << putInCenter("") << "║" << "\n";
             std::cout << "║" << putInCenter("No Trains are scheduled!") << "║" << "\n";
         }
         else
         {
-            for (auto train : allTrainsList)
+            for (auto &[_, train] : codeToTrain)
             {
                 if (count != 1)
                 {
@@ -175,13 +175,13 @@ void printAllTrains(std::vector<Train *> allTrainsList, bool printPositions = fa
         }
         else
         {
-            for (int index : positions)
+            for (auto code : positions)
             {
                 if (count != 1)
                 {
                     std::cout << "║" << "  --------------------------------------------------------------------------  " << "║" << "\n";
                 }
-                printTrainDetails(count, allTrainsList[index]);
+                printTrainDetails(count, codeToTrain[code]);
                 count++;
             }
         }
@@ -215,7 +215,7 @@ void printFlightDetails(int count, Flight *flight)
     std::cout << "║       │ Business Class │" << putInCenter("Rs. " + std::to_string(flight->seatPrices[1]), 12) << "│" + putLeftPaddingAndFillRight(std::to_string(flight->totalSeats[1]) + "(" + std::to_string(flight->totalSeats[1] - flight->bookedSeats[1]) + ")", 10, 32) << "│       ║\n";
     std::cout << "║       └────────────────┴────────────┴────────────────────────────────┘       ║\n";
 }
-void printAllFlights(std::vector<Flight *> allFlightsList, bool printPositions = false, std::vector<int> positions = {})
+void printAllFlights(std::unordered_map<std::string, Flight *> codeToFlight, bool printPositions = false, std::vector<std::string> positions = {})
 {
     system("cls");
     std::cout << "╔══════════════════════════════════════════════════════════════════════════════╗" << "\n";
@@ -225,14 +225,14 @@ void printAllFlights(std::vector<Flight *> allFlightsList, bool printPositions =
     int count = 1;
     if (!printPositions)
     {
-        if (allFlightsList.size() == 0)
+        if (codeToFlight.size() == 0)
         {
             std::cout << "║" << putInCenter("") << "║" << "\n";
             std::cout << "║" << putInCenter("No Flights are scheduled!") << "║" << "\n";
         }
         else
         {
-            for (auto flight : allFlightsList)
+            for (auto &[_, flight] : codeToFlight)
             {
                 if (count != 1)
                 {
@@ -252,13 +252,13 @@ void printAllFlights(std::vector<Flight *> allFlightsList, bool printPositions =
         }
         else
         {
-            for (int index : positions)
+            for (auto code : positions)
             {
                 if (count != 1)
                 {
                     std::cout << "║" << "  --------------------------------------------------------------------------  " << "║" << "\n";
                 }
-                printFlightDetails(count, allFlightsList[index]);
+                printFlightDetails(count, codeToFlight[code]);
                 count++;
             }
         }
@@ -296,8 +296,8 @@ void printAllTerminals(std::string terminal, std::unordered_map<std::string, Ter
     std::cout << "║" << putInCenter("") << "║" << "\n";
     std::cout << "╚══════════════════════════════════════════════════════════════════════════════╝" << "\n";
 }
-void printTransportOrTerminalSelectionPanel(std::string transport, std::string terminal, std::vector<Train *> allTrainsList,
-                                            std::vector<Flight *> allFlightsList, std::unordered_map<std::string, Terminal *> terminalsList)
+void printTransportOrTerminalSelectionPanel(std::string transport, std::string terminal, std::unordered_map<std::string, Train *> codeToTrain,
+                                            std::unordered_map<std::string, Flight *> codeToFlight, std::unordered_map<std::string, Terminal *> codeToTerminal)
 {
     system("cls");
     std::cout << "╔══════════════════════════════════════════════════════════════════════════════╗" << "\n";
@@ -314,18 +314,18 @@ void printTransportOrTerminalSelectionPanel(std::string transport, std::string t
     case '1':
     {
         if (transport == "Trains")
-            printAllTrains(allTrainsList);
+            printAllTrains(codeToTrain);
         else
-            printAllFlights(allFlightsList);
+            printAllFlights(codeToFlight);
         printContinue();
         break;
     }
     case '2':
     {
         if (terminal == "Stations")
-            printAllTerminals("Station", terminalsList);
+            printAllTerminals("Station", codeToTerminal);
         else
-            printAllTerminals("Airport", terminalsList);
+            printAllTerminals("Airport", codeToTerminal);
         printContinue();
         break;
     }
@@ -339,7 +339,7 @@ void printTransportOrTerminalSelectionPanel(std::string transport, std::string t
         break;
     }
     }
-    printTransportOrTerminalSelectionPanel(transport, terminal, allTrainsList, allFlightsList, terminalsList);
+    printTransportOrTerminalSelectionPanel(transport, terminal, codeToTrain, codeToFlight, codeToTerminal);
 }
 
 std::vector<std::string> printLoginPanel(std::string userType)
