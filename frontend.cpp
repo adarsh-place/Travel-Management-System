@@ -732,14 +732,11 @@ std::vector<std::string> printChangePasswordPanel()
     std::cout << "║" << putInCenter("Change Password Panel") << "║" << "\n";
     std::cout << "╚══════════════════════════════════════════════════════════════════════════════╝" << "\n";
     std::cout << "  Enter old password: ";
-    std::cin >> iOldPassword;
-    ignoreUptoNewLine();
+    iOldPassword = inputHashedPassword();
     std::cout << "  Enter new password: ";
-    std::cin >> iNewPassword;
-    ignoreUptoNewLine();
+    iNewPassword = inputHashedPassword();
     std::cout << "  Confirm password: ";
-    std::cin >> iConfirmPassword;
-    ignoreUptoNewLine();
+    iConfirmPassword = inputHashedPassword();
 
     // remove
     // printAlert(iOldPassword + iNewPassword + iConfirmPassword);
