@@ -528,9 +528,9 @@ void TrainAdmin::manageAddNewTransport()
     transform(coveringCitiesCode.begin(), coveringCitiesCode.end(), coveringCitiesCode.begin(), ::toupper);
 
     std::string failedMessage = "Failed to add Train!\n";
-    if (stationsCount == -1)
+    if (stationsCount < 1)
     {
-        printAlert(failedMessage + "Cities count should be integer");
+        printAlert(failedMessage + "Cities count should be a positive integer");
     }
     else if (name.size() == 0)
     {
@@ -816,9 +816,9 @@ void FlightAdmin::manageAddNewTransport()
     transform(coveringCitiesCode.begin(), coveringCitiesCode.end(), coveringCitiesCode.begin(), ::toupper);
 
     std::string failedMessage = "Failed to add Flight!\n";
-    if (airportsCount == -1)
+    if (airportsCount < 1)
     {
-        printAlert(failedMessage + "Cities count should be integer");
+        printAlert(failedMessage + "Cities count should be a positive integer");
     }
     else if (name.size() == 0)
     {
@@ -1338,7 +1338,7 @@ void TicketManager::trainTicketBooking(User *user)
 
         // taking user's train choice
         int trainChoice = inputNumber("Enter Train Choice: ");
-        if (trainChoice < 0 || trainChoice > filteredTrainsCode.size())
+        if (trainChoice < 1 || trainChoice > filteredTrainsCode.size())
         {
             message = "Invalid Choice.";
         }
@@ -1351,7 +1351,7 @@ void TicketManager::trainTicketBooking(User *user)
         trainSeatSelectionCheckPoint:
             printSeatTypeSelectionPanel("Train", trainName);
             int seatChoice = inputNumber();
-            if (seatChoice < 0 || seatChoice > 5)
+            if (seatChoice < 1 || seatChoice > 5)
             {
                 printContinue("Invalid Choice!");
                 goto trainSeatSelectionCheckPoint;
@@ -1394,7 +1394,6 @@ void TicketManager::trainTicketBooking(User *user)
 }
 void TicketManager::trainTicketCancelling(std::vector<TrainTicket *> &trainTickets)
 {
-
     printAllTrainTickets(trainTickets);
 
     bool success = false;
@@ -1409,7 +1408,7 @@ void TicketManager::trainTicketCancelling(std::vector<TrainTicket *> &trainTicke
     else
     {
         int ticketChoice = inputNumber("Enter choice number to cancel ticket: ");
-        if (ticketChoice < 0 || ticketChoice > ticketsCt)
+        if (ticketChoice < 1 || ticketChoice > ticketsCt)
         {
             message = "Invalid Choice!";
         }
@@ -1479,7 +1478,7 @@ void TicketManager::flightTicketBooking(User *user)
 
         // taking user's flight choice
         int flightChoice = inputNumber("Enter Flight Choice: ");
-        if (flightChoice < 0 || flightChoice > filteredFlightsCode.size())
+        if (flightChoice < 1 || flightChoice > filteredFlightsCode.size())
         {
             message = "Invalid Choice.";
         }
@@ -1492,7 +1491,7 @@ void TicketManager::flightTicketBooking(User *user)
         flightSeatSelectionCheckPoint:
             printSeatTypeSelectionPanel("Flight", flightName);
             int seatChoice = inputNumber();
-            if (seatChoice < 0 || seatChoice > 3)
+            if (seatChoice < 1 || seatChoice > 3)
             {
                 printContinue("Invalid Choice!");
                 goto flightSeatSelectionCheckPoint;
@@ -1551,7 +1550,7 @@ void TicketManager::flightTicketCancelling(std::vector<FlightTicket *> &flightTi
     else
     {
         int ticketChoice = inputNumber("Enter choice number to cancel ticket: ");
-        if (ticketChoice < 0 || ticketChoice > ticketsCt)
+        if (ticketChoice < 1 || ticketChoice > ticketsCt)
         {
             message = "Invalid Choice!";
         }
