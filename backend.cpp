@@ -1,4 +1,5 @@
 #include "classes.h"
+#include "trie.cpp"
 #include "frontend.cpp"
 
 const std::string flight_admin_email = "flightadmin@gmail.com";
@@ -6,10 +7,11 @@ const std::string flight_admin_password = "flightadmin@123";
 const std::string train_admin_email = "trainadmin@gmail.com";
 const std::string train_admin_password = "trainadmin@123";
 
-std::unordered_map<std::string, Train *> codeToTrain;
-std::unordered_map<std::string, Flight *> codeToFlight;
-std::unordered_map<std::string, Terminal *> codeToStation;
-std::unordered_map<std::string, Terminal *> codeToAirport;
+Trie<Train> codeToTrain;
+Trie<Flight> codeToFlight;
+Trie<Terminal> codeToStation;
+Trie<Terminal> codeToAirport;
+
 std::vector<User *> allUsersList;
 
 FlightAdmin *flightAdmin = new FlightAdmin(flight_admin_email, flight_admin_password);
@@ -23,7 +25,7 @@ bool isLeapYear(int year)
 {
     return (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
 }
-DateTime *stringToDateTime(std::string &str)
+DateTime *stringToDateTime(const std::string &str)
 {
     int day, month, year, hour, minute;
 
@@ -63,7 +65,7 @@ DateTime *stringToDateTime(std::string &str)
 
     return new DateTime(str, year, month, day, hour, minute);
 }
-bool isOnlyDigits(std::string &str, std::string extraChars = "")
+bool isOnlyDigits(const std::string &str, std::string extraChars = "")
 {
     for (char ch : str)
     {
@@ -84,7 +86,7 @@ bool isOnlyDigits(std::string &str, std::string extraChars = "")
     }
     return true;
 }
-bool isOnlyAlphas(std::string &str, std::string extraChars = "")
+bool isOnlyAlphas(const std::string &str, std::string extraChars = "")
 {
     for (char ch : str)
     {
@@ -105,7 +107,7 @@ bool isOnlyAlphas(std::string &str, std::string extraChars = "")
     }
     return true;
 }
-bool isOnlyDigitOrAlpha(std::string &str, std::string extraChars = "")
+bool isOnlyDigitOrAlpha(const std::string &str, std::string extraChars = "")
 {
     for (char ch : str)
     {
@@ -127,27 +129,27 @@ bool isOnlyDigitOrAlpha(std::string &str, std::string extraChars = "")
     return true;
 }
 
-bool isStationCodeExists(std::string stationCode)
+bool isStationCodeExists(const std::string &stationCode)
 {
-    if (codeToStation.count(stationCode) == 0)
+    if (!codeToStation.search(stationCode))
         return false;
     return true;
 }
-bool isAirportCodeExists(std::string airportCode)
+bool isAirportCodeExists(const std::string &airportCode)
 {
-    if (codeToAirport.count(airportCode) == 0)
+    if (!codeToAirport.search(airportCode))
         return false;
     return true;
 }
-bool isTrainCodeExists(std::string trainCode)
+bool isTrainCodeExists(const std::string &trainCode)
 {
-    if (codeToTrain.count(trainCode) == 0)
+    if (!codeToTrain.search(trainCode))
         return false;
     return true;
 }
-bool isFlightCodeExists(std::string flightCode)
+bool isFlightCodeExists(const std::string &flightCode)
 {
-    if (codeToFlight.count(flightCode) == 0)
+    if (!codeToFlight.search(flightCode))
         return false;
     return true;
 }
@@ -174,7 +176,7 @@ std::tuple<std::vector<std::string>, std::vector<std::pair<ListNode *, ListNode 
     DateTime validLowDate = journeyDate - (*diff);
     DateTime validHighDate = journeyDate + (*diff);
 
-    auto temp = [&](ListNode *node, std::string number)
+    auto findTerminals = [&](ListNode *node, std::string number)
     {
         auto boardingTerminal = terminalInTransportRoute(node, boardingTerminalCode);
         if (boardingTerminal != NULL && validLowDate <= boardingTerminal->departureTime && validHighDate >= boardingTerminal->departureTime)
@@ -190,16 +192,18 @@ std::tuple<std::vector<std::string>, std::vector<std::pair<ListNode *, ListNode 
 
     if (transport == "Train")
     {
-        for (auto &[_, t] : codeToTrain)
+        auto trainsList = codeToTrain.traverse();
+        for (auto &[_, t] : trainsList)
         {
-            temp(t->coveringCities, t->number);
+            findTerminals(t->coveringCities, t->number);
         }
     }
     else
     {
-        for (auto &[_, f] : codeToFlight)
+        auto flightsList = codeToFlight.traverse();
+        for (auto &[_, f] : flightsList)
         {
-            temp(f->coveringCities, f->number);
+            findTerminals(f->coveringCities, f->number);
         }
     }
     return {positions, citiesList};
@@ -264,6 +268,55 @@ DateTime *getCurrentDateTime()
     std::string formattedDateTime = buffer;
 
     return stringToDateTime(formattedDateTime);
+}
+
+void manageTransportAndTerminalView(const std::string &transport, const std::string &terminal)
+{
+    printTransportOrTerminalSelectionPanel(transport, terminal);
+    char choice = inputUserChoice();
+    switch (choice)
+    {
+    case '1':
+    {
+        if (transport == "Train")
+        {
+            auto trainsList = codeToTrain.traverse();
+            printAllTrains(trainsList);
+        }
+        else
+        {
+            auto flightsList = codeToFlight.traverse();
+            printAllFlights(flightsList);
+        }
+        printContinue();
+        break;
+    }
+    case '2':
+    {
+        if (terminal == "Station")
+        {
+            auto stationsList = codeToStation.traverse();
+            printAllTerminals("Station", stationsList);
+        }
+        else
+        {
+            auto airportsList = codeToAirport.traverse();
+            printAllTerminals("Airport", airportsList);
+        }
+        printContinue();
+        break;
+    }
+    case '3':
+    {
+        return;
+    }
+    default:
+    {
+        printAlert({"Wrong Choice!"});
+        break;
+    }
+    }
+    manageTransportAndTerminalView(transport, terminal);
 }
 
 // DateTime struct
@@ -424,7 +477,7 @@ void TrainAdmin::adminDashboard()
     {
     case '1':
     {
-        printTransportOrTerminalSelectionPanel("Trains", "Stations", codeToTrain, codeToFlight, codeToStation);
+        manageTransportAndTerminalView("Train", "Station");
         break;
     }
     case '2':
@@ -528,7 +581,7 @@ void TrainAdmin::manageAddNewTransport()
     transform(coveringCitiesCode.begin(), coveringCitiesCode.end(), coveringCitiesCode.begin(), ::toupper);
 
     std::string failedMessage = "Failed to add Train!\n";
-    if (stationsCount == -1)
+    if (stationsCount < 1)
     {
         printAlert(failedMessage + "Cities count should be integer");
     }
@@ -614,7 +667,7 @@ void TrainAdmin::manageAddNewTransport()
         ListNode *movingPtr = coveringCities;
         for (int i = 0; i < stationsCount; i++)
         {
-            movingPtr->next = new ListNode;
+            movingPtr->next = new ListNode();
             movingPtr = movingPtr->next;
             movingPtr->currentTerminal = *coveringStations[i];
             movingPtr->departureTime = *stationDTs[i];
@@ -711,7 +764,7 @@ void FlightAdmin::adminDashboard()
     {
     case '1':
     {
-        printTransportOrTerminalSelectionPanel("Flights", "Airports", codeToTrain, codeToFlight, codeToAirport);
+        manageTransportAndTerminalView("Flight", "Airport");
         break;
     }
     case '2':
@@ -816,7 +869,7 @@ void FlightAdmin::manageAddNewTransport()
     transform(coveringCitiesCode.begin(), coveringCitiesCode.end(), coveringCitiesCode.begin(), ::toupper);
 
     std::string failedMessage = "Failed to add Flight!\n";
-    if (airportsCount == -1)
+    if (airportsCount < 1)
     {
         printAlert(failedMessage + "Cities count should be integer");
     }
@@ -1118,12 +1171,12 @@ void UserManager::userDashboard()
     {
     case '1':
     {
-        printTransportOrTerminalSelectionPanel("Trains", "Stations", codeToTrain, codeToFlight, codeToStation);
+        manageTransportAndTerminalView("Train", "Station");
         break;
     }
     case '2':
     {
-        printTransportOrTerminalSelectionPanel("Flights", "Airports", codeToTrain, codeToFlight, codeToAirport);
+        manageTransportAndTerminalView("Flight", "Airport");
         break;
     }
     case '3':
@@ -1236,7 +1289,7 @@ void TicketManager::ticketViewingPanel(User *user)
     }
     case '3':
     {
-        break;
+        return;
     }
     default:
     {
@@ -1244,6 +1297,7 @@ void TicketManager::ticketViewingPanel(User *user)
         break;
     }
     }
+    this->ticketViewingPanel(user);
 }
 void TicketManager::ticketBookingPanel(User *user)
 {
@@ -1326,11 +1380,17 @@ void TicketManager::trainTicketBooking(User *user)
         // search for Train;
         auto [filteredTrainsCode, fromToList] = filterTransportsForUser("Train", inputs[0], inputs[1], *journeyDate);
 
+        std::vector<std::pair<std::string, Train *>> filteredTrains;
+        for (auto str : filteredTrainsCode)
+        {
+            filteredTrains.push_back({str, codeToTrain[str]});
+        }
+
         // showing all available trains
-        printAllTrains(codeToTrain, true, filteredTrainsCode);
+        printAllTrains(filteredTrains);
 
         // If no trains are available then return
-        if (filteredTrainsCode.size() == 0)
+        if (filteredTrains.size() == 0)
         {
             printContinue();
             return;
@@ -1338,20 +1398,20 @@ void TicketManager::trainTicketBooking(User *user)
 
         // taking user's train choice
         int trainChoice = inputNumber("Enter Train Choice: ");
-        if (trainChoice < 0 || trainChoice > filteredTrainsCode.size())
+        if (trainChoice < 1 || trainChoice > filteredTrains.size())
         {
             message = "Invalid Choice.";
         }
         else
         {
             trainChoice--;
-            Train *choosenTrain = codeToTrain[filteredTrainsCode[trainChoice]];
+            Train *choosenTrain = filteredTrains[trainChoice].second;
             std::string trainName = choosenTrain->name;
 
         trainSeatSelectionCheckPoint:
             printSeatTypeSelectionPanel("Train", trainName);
             int seatChoice = inputNumber();
-            if (seatChoice < 0 || seatChoice > 5)
+            if (seatChoice < 1 || seatChoice > 5)
             {
                 printContinue("Invalid Choice!");
                 goto trainSeatSelectionCheckPoint;
@@ -1394,7 +1454,6 @@ void TicketManager::trainTicketBooking(User *user)
 }
 void TicketManager::trainTicketCancelling(std::vector<TrainTicket *> &trainTickets)
 {
-
     printAllTrainTickets(trainTickets);
 
     bool success = false;
@@ -1409,7 +1468,7 @@ void TicketManager::trainTicketCancelling(std::vector<TrainTicket *> &trainTicke
     else
     {
         int ticketChoice = inputNumber("Enter choice number to cancel ticket: ");
-        if (ticketChoice < 0 || ticketChoice > ticketsCt)
+        if (ticketChoice < 1 || ticketChoice > ticketsCt)
         {
             message = "Invalid Choice!";
         }
@@ -1468,10 +1527,16 @@ void TicketManager::flightTicketBooking(User *user)
         auto [filteredFlightsCode, fromToList] = filterTransportsForUser("Flight", inputs[0], inputs[1], *journeyDate);
 
         // showing all available flights
-        printAllFlights(codeToFlight, true, filteredFlightsCode);
+        std::vector<std::pair<std::string, Flight *>> filteredFlights;
+        for (auto str : filteredFlightsCode)
+        {
+            filteredFlights.push_back({str, codeToFlight[str]});
+        }
+
+        printAllFlights(filteredFlights);
 
         // If no flights are available then return
-        if (filteredFlightsCode.size() == 0)
+        if (filteredFlights.size() == 0)
         {
             printContinue();
             return;
@@ -1479,20 +1544,20 @@ void TicketManager::flightTicketBooking(User *user)
 
         // taking user's flight choice
         int flightChoice = inputNumber("Enter Flight Choice: ");
-        if (flightChoice < 0 || flightChoice > filteredFlightsCode.size())
+        if (flightChoice < 1 || flightChoice > filteredFlights.size())
         {
             message = "Invalid Choice.";
         }
         else
         {
             flightChoice--;
-            Flight *choosenFlight = codeToFlight[filteredFlightsCode[flightChoice]];
+            Flight *choosenFlight = filteredFlights[flightChoice].second;
             std::string flightName = choosenFlight->name;
 
         flightSeatSelectionCheckPoint:
             printSeatTypeSelectionPanel("Flight", flightName);
             int seatChoice = inputNumber();
-            if (seatChoice < 0 || seatChoice > 3)
+            if (seatChoice < 1 || seatChoice > 3)
             {
                 printContinue("Invalid Choice!");
                 goto flightSeatSelectionCheckPoint;
@@ -1551,7 +1616,7 @@ void TicketManager::flightTicketCancelling(std::vector<FlightTicket *> &flightTi
     else
     {
         int ticketChoice = inputNumber("Enter choice number to cancel ticket: ");
-        if (ticketChoice < 0 || ticketChoice > ticketsCt)
+        if (ticketChoice < 1 || ticketChoice > ticketsCt)
         {
             message = "Invalid Choice!";
         }
@@ -2034,7 +2099,8 @@ void CSVManager ::saveAllStations()
     // Optional header
     file << "Code,Name,City\n";
 
-    for (const auto &[_, station] : codeToStation)
+    auto stationsList = codeToStation.traverse();
+    for (const auto &[_, station] : stationsList)
     {
         file << station->code << "," << station->name << "," << station->city << "\n";
     }
@@ -2068,7 +2134,8 @@ void CSVManager ::saveAllAirports()
     // Optional header
     file << "Code,Name,City\n";
 
-    for (const auto &[_, airport] : codeToAirport)
+    auto airportsList = codeToAirport.traverse();
+    for (const auto &[_, airport] : airportsList)
     {
         file << airport->code << "," << airport->name << "," << airport->city << "\n";
     }
@@ -2107,7 +2174,8 @@ void CSVManager ::saveAllTrains()
     // Write header
     file << "Number,Name,Total Seats,Covering City Codes,Departure Times\n";
 
-    for (const auto &[_, train] : codeToTrain)
+    auto trainsList = codeToTrain.traverse();
+    for (const auto &[_, train] : trainsList)
     {
         std::string totalSeats = join(train->totalSeats, '|');
         auto coveringCities = join(train->coveringCities, '|');
@@ -2153,7 +2221,8 @@ void CSVManager ::saveAllFlights()
     // Write header
     file << "Number,Name,Total Seats,Covering City Codes,Departure Times\n";
 
-    for (const auto &[_, flight] : codeToFlight)
+    auto flightsList = codeToFlight.traverse();
+    for (const auto &[_, flight] : flightsList)
     {
         std::string totalSeats = join(flight->totalSeats, '|');
         auto coveringCities = join(flight->coveringCities, '|');
@@ -2284,12 +2353,12 @@ void ControlPanel()
     {
     case '1':
     {
-        printTransportOrTerminalSelectionPanel("Trains", "Stations", codeToTrain, codeToFlight, codeToStation);
+        manageTransportAndTerminalView("Train", "Station");
         break;
     }
     case '2':
     {
-        printTransportOrTerminalSelectionPanel("Flights", "Airports", codeToTrain, codeToFlight, codeToAirport);
+        manageTransportAndTerminalView("Flight", "Airport");
         break;
     }
     case '3':
@@ -2347,23 +2416,9 @@ void ControlPanel()
 // free the allocated space in memory
 void cleanMemory()
 {
-    for (const auto &[_, t] : codeToStation)
-        delete t;
-    for (const auto &[_, t] : codeToAirport)
-        delete t;
-    for (const auto &[_, t] : codeToTrain)
-        delete t;
-    for (const auto &[_, t] : codeToFlight)
-        delete t;
-
     // delete all listnode pointers in train
     // delete all users pointers in unsermanager
     // delete all tickets pointers of each user
-
-    codeToStation.clear();
-    codeToAirport.clear();
-    codeToTrain.clear();
-    codeToFlight.clear();
 
     delete flightAdmin;
     delete trainAdmin;
