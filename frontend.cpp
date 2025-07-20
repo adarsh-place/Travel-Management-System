@@ -622,15 +622,15 @@ void printAllTrainTickets(std::vector<TrainTicket *> trainTickets)
             std::cout << "║" << putInCenter("") << "║" << "\n";
             std::cout << "║" << putInCenter(std::to_string(count) + ". " + t->trainPtr->name + "(" + t->trainPtr->number + ")") << "║" << "\n";
             std::cout << "║" << putInCenter("") << "║" << "\n";
-            // std::cout << "║           " << putInCenter(t->boardingListNode->currentTerminal->name, 26) << "    " << putInCenter(t->destinationTerminal->name, 26) << "           ║" << "\n";
             std::cout << "║           " << putInCenter(t->boardingListNode->currentTerminal.code, 26) << "    " << putInCenter(t->destinationListNode->currentTerminal.code, 26) << "           ║" << "\n";
             std::cout << "║           " << putInCenter(t->boardingListNode->currentTerminal.city, 26) << "--->" << putInCenter(t->destinationListNode->currentTerminal.city, 26) << "           ║" << "\n";
             std::cout << "║           " << putInCenter("[" + t->boardingListNode->departureTime.rawDT + "]", 26) << "    " << putInCenter("[" + t->destinationListNode->departureTime.rawDT + "]", 26) << "           ║" << "\n";
             std::cout << "║" << putInCenter("") << "║" << "\n";
             std::cout << "║" << putInCenter("PNR: " + t->pnr, 30) << putInCenter("", 18) << putInCenter(trainSeatTypes[t->seatChoice], 30) << "║" << "\n";
             std::cout << "║" << putInCenter("") << "║" << "\n";
-            std::cout << "║" << putInCenter("", 78 - 32) << putInCenter("Booking Price: Rs." + std::to_string(t->price), 32) << "║" << "\n";
-            std::cout << "║" << putInCenter("", 78 - 32) << putInCenter("Booked At: " + t->bookingDate->rawDT, 32) << "║" << "\n";
+            std::cout << "║" << putInCenter("Name: " + t->passengerName, 30) << putInCenter("", 18) << putInCenter("Booking Price: Rs." + std::to_string(t->price), 30) << "║" << "\n";
+            std::cout << "║" << putInCenter("( " + t->passengerEmail + " )", 30) << putInCenter("", 18) << putInCenter("Booked At: " + t->bookingDate->rawDT, 30) << "║" << "\n";
+
             count++;
         }
     }
@@ -661,15 +661,14 @@ void printAllFlightTickets(std::vector<FlightTicket *> flightTickets)
             std::cout << "║" << putInCenter("") << "║" << "\n";
             std::cout << "║" << putInCenter(std::to_string(count) + ". " + t->flightPtr->name + "(" + t->flightPtr->number + ")") << "║" << "\n";
             std::cout << "║" << putInCenter("") << "║" << "\n";
-            // std::cout << "║           " << putInCenter(t->boardingTerminal->name, 26) << "    " << putInCenter(t->destinationTerminal->name, 26) << "           ║" << "\n";
             std::cout << "║           " << putInCenter(t->boardingListNode->currentTerminal.code, 26) << "    " << putInCenter(t->destinationListNode->currentTerminal.code, 26) << "           ║" << "\n";
             std::cout << "║           " << putInCenter(t->boardingListNode->currentTerminal.city, 26) << "--->" << putInCenter(t->destinationListNode->currentTerminal.city, 26) << "           ║" << "\n";
             std::cout << "║           " << putInCenter("[" + t->boardingListNode->departureTime.rawDT + "]", 26) << "    " << putInCenter("[" + t->destinationListNode->departureTime.rawDT + "]", 26) << "           ║" << "\n";
             std::cout << "║" << putInCenter("") << "║" << "\n";
             std::cout << "║" << putInCenter("PNR: " + t->pnr, 30) << putInCenter("", 18) << putInCenter(flightSeatTypes[t->seatChoice], 30) << "║" << "\n";
             std::cout << "║" << putInCenter("") << "║" << "\n";
-            std::cout << "║" << putInCenter("", 78 - 32) << putInCenter("Booking Price: Rs." + std::to_string(t->price), 32) << "║" << "\n";
-            std::cout << "║" << putInCenter("", 78 - 32) << putInCenter("Booked At: " + t->bookingDate->rawDT, 32) << "║" << "\n";
+            std::cout << "║" << putInCenter("Name: " + t->passengerName, 30) << putInCenter("", 18) << putInCenter("Booking Price: Rs." + std::to_string(t->price), 30) << "║" << "\n";
+            std::cout << "║" << putInCenter("( " + t->passengerEmail + " )", 30) << putInCenter("", 18) << putInCenter("Booked At: " + t->bookingDate->rawDT, 30) << "║" << "\n";
 
             count++;
         }

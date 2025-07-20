@@ -429,22 +429,22 @@ void TrainAdmin::adminDashboard()
     }
     case '2':
     {
-        this->addNewTransport();
+        this->manageAddNewTransport();
         break;
     }
     case '3':
     {
-        this->addNewTerminal();
+        this->manageAddNewTerminal();
         break;
     }
     case '4':
     {
-        this->removeTransport();
+        this->manageRemoveTransport();
         break;
     }
     case '5':
     {
-        this->removeTerminal();
+        this->manageRemoveTerminal();
         break;
     }
     case '6':
@@ -460,7 +460,7 @@ void TrainAdmin::adminDashboard()
     }
     this->adminDashboard();
 }
-void TrainAdmin::addNewTerminal()
+void TrainAdmin::manageAddNewTerminal()
 {
     std::string name, city, code;
     printAddNewTerminalPanel("Station", name, city, code);
@@ -519,7 +519,7 @@ void TrainAdmin::addNewTerminal()
         printAlert("Failed to add station.\n" + message);
     }
 }
-void TrainAdmin::addNewTransport()
+void TrainAdmin::manageAddNewTransport()
 {
     int stationsCount;
     std::string name, number, coveringCitiesCode, departureTimes, totalSeats;
@@ -627,7 +627,7 @@ void TrainAdmin::addNewTransport()
         printAlert("Train added successfully");
     }
 }
-void TrainAdmin::removeTerminal()
+void TrainAdmin::manageRemoveTerminal()
 {
     std::string stationCode;
     printRemoveTerminalPanel("Station", stationCode);
@@ -665,7 +665,7 @@ void TrainAdmin::removeTerminal()
         printAlert("Failed to remove Station.\n" + message);
     }
 }
-void TrainAdmin::removeTransport()
+void TrainAdmin::manageRemoveTransport()
 {
     std::string trainNumber;
     printRemoveTransportPanel("Train", trainNumber);
@@ -716,22 +716,22 @@ void FlightAdmin::adminDashboard()
     }
     case '2':
     {
-        this->addNewTransport();
+        this->manageAddNewTransport();
         break;
     }
     case '3':
     {
-        this->addNewTerminal();
+        this->manageAddNewTerminal();
         break;
     }
     case '4':
     {
-        this->removeTransport();
+        this->manageRemoveTransport();
         break;
     }
     case '5':
     {
-        this->removeTerminal();
+        this->manageRemoveTerminal();
         break;
     }
     case '6':
@@ -747,7 +747,7 @@ void FlightAdmin::adminDashboard()
     }
     this->adminDashboard();
 }
-void FlightAdmin::addNewTerminal()
+void FlightAdmin::manageAddNewTerminal()
 {
     std::string name, city, code;
     printAddNewTerminalPanel("Airport", name, city, code);
@@ -806,7 +806,7 @@ void FlightAdmin::addNewTerminal()
         printAlert("Failed to add airport.\n" + message);
     }
 }
-void FlightAdmin::addNewTransport()
+void FlightAdmin::manageAddNewTransport()
 {
     int airportsCount;
     std::string name, number, coveringCitiesCode, departureTimes, totalSeats;
@@ -907,7 +907,7 @@ void FlightAdmin::addNewTransport()
         printAlert("Flight added successfully");
     }
 }
-void FlightAdmin::removeTerminal()
+void FlightAdmin::manageRemoveTerminal()
 {
     std::string airportCode;
     printRemoveTerminalPanel("Airport", airportCode);
@@ -945,7 +945,7 @@ void FlightAdmin::removeTerminal()
         printAlert("Failed to remove Airport!\n" + message);
     }
 }
-void FlightAdmin::removeTransport()
+void FlightAdmin::manageRemoveTransport()
 {
     std::string flightNumber;
     printRemoveTransportPanel("Flight", flightNumber);
@@ -995,7 +995,7 @@ void User::setPassword(std::string newPassword)
 }
 
 // UserManager Class
-UserManager::UserManager()
+UserManager::UserManager() : TicketManager()
 {
     this->loggedInUser = NULL;
 }
@@ -1128,65 +1128,17 @@ void UserManager::userDashboard()
     }
     case '3':
     {
-        this->ticketBookingPanel();
+        this->ticketBookingPanel(this->loggedInUser);
         break;
     }
     case '4':
     {
-        printTicketTransportSelection("View");
-        char choice2 = inputUserChoice();
-        switch (choice2)
-        {
-        case '1':
-        {
-            printAllTrainTickets(this->loggedInUser->trainTickets);
-            printContinue();
-            break;
-        }
-        case '2':
-        {
-            printAllFlightTickets(this->loggedInUser->flightTickets);
-            printContinue();
-            break;
-        }
-        case '3':
-        {
-            break;
-        }
-        default:
-        {
-            printAlert("Wrong Choice!");
-            break;
-        }
-        }
+        this->ticketViewingPanel(this->loggedInUser);
         break;
     }
     case '5':
     {
-        printTicketTransportSelection("Cancel");
-        char choice2 = inputUserChoice();
-        switch (choice2)
-        {
-        case '1':
-        {
-            this->cancelTicketPanel("Train");
-            break;
-        }
-        case '2':
-        {
-            this->cancelTicketPanel("Flight");
-            break;
-        }
-        case '3':
-        {
-            break;
-        }
-        default:
-        {
-            printAlert("Wrong Choice!");
-            break;
-        }
-        }
+        this->ticketCancellingPanel(this->loggedInUser);
         break;
     }
     case 'a':
@@ -1213,7 +1165,87 @@ void UserManager::userDashboard()
     }
     this->userDashboard();
 }
-void UserManager::ticketBookingPanel()
+void UserManager::changeUserPassword()
+{
+    std::vector<std::string> info = printChangePasswordPanel();
+    std::string message;
+    bool success = false;
+    if (info[1].size() == 0)
+    {
+        message = "Password is required.";
+    }
+    else if (info[1] != info[2])
+    {
+        message = "New password and Confirm password does not match.";
+    }
+    else if (info[0] != this->loggedInUser->getPassword())
+    {
+        message = "Wrong Old Password.";
+    }
+    else
+    {
+        loggedInUser->setPassword(info[1]);
+        // writing in file
+        csvManager->saveAllUsers();
+        success = true;
+    }
+
+    if (success)
+    {
+        printAlert("Password Changed Successfully");
+    }
+    else
+    {
+        printAlert("Failed to change password!\n" + message);
+    }
+}
+void UserManager::changeUserName()
+{
+    std::string newName = printChangeNamePanel(this->loggedInUser->fullName);
+    std::string message;
+    if (newName.size() == 0)
+        message = "Failed to change name!\nName is required.";
+    else
+    {
+        this->loggedInUser->fullName = newName;
+        // writing in file
+        csvManager->saveAllUsers();
+        message = "Name Updated Successfully";
+    }
+    printAlert(message);
+}
+
+// TicketManager Class
+void TicketManager::ticketViewingPanel(User *user)
+{
+    printTicketTransportSelection("View");
+    char choice2 = inputUserChoice();
+    switch (choice2)
+    {
+    case '1':
+    {
+        printAllTrainTickets(user->trainTickets);
+        printContinue();
+        break;
+    }
+    case '2':
+    {
+        printAllFlightTickets(user->flightTickets);
+        printContinue();
+        break;
+    }
+    case '3':
+    {
+        break;
+    }
+    default:
+    {
+        printAlert("Wrong Choice!");
+        break;
+    }
+    }
+}
+void TicketManager::ticketBookingPanel(User *user)
 {
     printBookingTransportSelection();
     char choice2 = inputUserChoice();
@@ -1221,12 +1253,12 @@ void UserManager::ticketBookingPanel()
     {
     case '1':
     {
-        this->trainTicketBooking();
+        this->trainTicketBooking(user);
         break;
     }
     case '2':
     {
-        this->flightTicketBooking();
+        this->flightTicketBooking(user);
         break;
     }
     case '3':
@@ -1236,11 +1268,40 @@ void UserManager::ticketBookingPanel()
     deafult:
     {
         printAlert("Wrong Choice!");
-        this->ticketBookingPanel();
+        this->ticketBookingPanel(user);
     }
     }
 }
-void UserManager::trainTicketBooking()
+void TicketManager::ticketCancellingPanel(User *user)
+{
+    printTicketTransportSelection("Cancel");
+    char choice2 = inputUserChoice();
+    switch (choice2)
+    {
+    case '1':
+    {
+        this->trainTicketCancelling(user->trainTickets);
+        break;
+    }
+    case '2':
+    {
+        this->flightTicketCancelling(user->flightTickets);
+        break;
+    }
+    case '3':
+    {
+        break;
+    }
+    default:
+    {
+        printAlert("Wrong Choice!");
+        this->ticketCancellingPanel(user);
+        break;
+    }
+    }
+}
+
+void TicketManager::trainTicketBooking(User *user)
 {
     std::vector<std::string> inputs = printTicketBookingPanel("Train");
     inputs[2] += "-00:00";
@@ -1307,11 +1368,11 @@ void UserManager::trainTicketBooking()
                     std::string pnr = generateTrainTicketPNR();
                     DateTime *bookingDate = getCurrentDateTime();
 
-                    TrainTicket *newTicket = new TrainTicket(seatChoice, choosenTrain, fromToList[trainChoice].first, fromToList[trainChoice].second, pnr, bookingDate);
-                    loggedInUser->trainTickets.push_back(newTicket);
+                    TrainTicket *newTicket = new TrainTicket(seatChoice, choosenTrain, fromToList[trainChoice].first, fromToList[trainChoice].second, pnr, bookingDate, user->fullName, user->email);
+                    user->trainTickets.push_back(newTicket);
                     choosenTrain->bookedSeats[seatChoice]++;
                     // write in file;
-                    csvManager->saveNewTrainTicket(newTicket, this->loggedInUser->email);
+                    csvManager->saveNewTrainTicket(newTicket, user->email);
                     success = true;
                 }
                 else
@@ -1331,7 +1392,57 @@ void UserManager::trainTicketBooking()
         printAlert("Booking Failed!\n" + message);
     }
 }
-void UserManager::flightTicketBooking()
+void TicketManager::trainTicketCancelling(std::vector<TrainTicket *> &trainTickets)
+{
+
+    printAllTrainTickets(trainTickets);
+
+    bool success = false;
+    std::string message;
+
+    int ticketsCt = trainTickets.size();
+    if (ticketsCt == 0)
+    {
+        printContinue();
+        return;
+    }
+    else
+    {
+        int ticketChoice = inputNumber("Enter choice number to cancel ticket: ");
+        if (ticketChoice < 0 || ticketChoice > ticketsCt)
+        {
+            message = "Invalid Choice!";
+        }
+        else
+        {
+            ticketChoice--;
+
+            // increment seats in train
+            int seatChoice = trainTickets[ticketChoice]->seatChoice;
+            trainTickets[ticketChoice]->trainPtr->bookedSeats[seatChoice]--;
+
+            // delete ticket from trainTickets
+            TrainTicket *tT = trainTickets[ticketChoice];
+            trainTickets.erase(trainTickets.begin() + ticketChoice);
+
+            // updating file data
+            csvManager->saveAllTrainTickets();
+
+            success = true;
+            delete tT;
+        }
+    }
+
+    if (success)
+    {
+        printAlert("Ticket Canceled Successfully.");
+    }
+    else
+    {
+        printAlert("Failed to cancel Ticket!\n" + message);
+    }
+}
+void TicketManager::flightTicketBooking(User *user)
 {
     std::vector<std::string> inputs = printTicketBookingPanel("Flight");
     inputs[2] += "-00:00";
@@ -1398,11 +1509,11 @@ void UserManager::flightTicketBooking()
                     std::string pnr = generateFlightTicketPNR();
                     DateTime *bookingDate = getCurrentDateTime();
 
-                    FlightTicket *newTicket = new FlightTicket(seatChoice, choosenFlight, fromToList[flightChoice].first, fromToList[flightChoice].second, pnr, bookingDate);
-                    loggedInUser->flightTickets.push_back(newTicket);
+                    FlightTicket *newTicket = new FlightTicket(seatChoice, choosenFlight, fromToList[flightChoice].first, fromToList[flightChoice].second, pnr, bookingDate, user->fullName, user->email);
+                    user->flightTickets.push_back(newTicket);
                     choosenFlight->bookedSeats[seatChoice]++;
                     // write in file;
-                    csvManager->saveNewFlightTicket(newTicket, this->loggedInUser->email);
+                    csvManager->saveNewFlightTicket(newTicket, user->email);
                     success = true;
                 }
                 else
@@ -1419,29 +1530,23 @@ void UserManager::flightTicketBooking()
     }
     else
     {
-        printAlert("Booking Failed!" + message);
+        printAlert("Booking Failed!\n" + message);
     }
 }
-void UserManager::cancelTicketPanel(std::string transport)
+void TicketManager::flightTicketCancelling(std::vector<FlightTicket *> &flightTickets)
 {
     int ticketsCt;
-    if (transport == "Train")
-    {
-        printAllTrainTickets(this->loggedInUser->trainTickets);
-        ticketsCt = this->loggedInUser->trainTickets.size();
-    }
-    else
-    {
-        printAllFlightTickets(this->loggedInUser->flightTickets);
-        ticketsCt = this->loggedInUser->flightTickets.size();
-    }
+
+    printAllFlightTickets(flightTickets);
 
     bool success = false;
     std::string message;
 
+    ticketsCt = flightTickets.size();
     if (ticketsCt == 0)
     {
         printContinue();
+        return;
     }
     else
     {
@@ -1453,31 +1558,20 @@ void UserManager::cancelTicketPanel(std::string transport)
         else
         {
             ticketChoice--;
-            if (transport == "Train")
-            {
-                auto allTrainTickets = &this->loggedInUser->trainTickets;
-                int seatChoice = (*allTrainTickets)[ticketChoice]->seatChoice;
-                // increment seats in train
-                (*allTrainTickets)[ticketChoice]->trainPtr->bookedSeats[seatChoice]--;
-                // delete ticket from allTrainTickets;
-                TrainTicket *tT = (*allTrainTickets)[ticketChoice];
-                (*allTrainTickets).erase((*allTrainTickets).begin() + ticketChoice);
-                csvManager->saveAllTrainTickets();
-                delete (tT);
-            }
-            else
-            {
-                auto allFlightTickets = &this->loggedInUser->flightTickets;
-                int seatChoice = (*allFlightTickets)[ticketChoice]->seatChoice;
-                // increment seats in flight
-                (*allFlightTickets)[ticketChoice]->flightPtr->bookedSeats[seatChoice]--;
-                // delete ticket from allFlightTickets;
-                FlightTicket *fT = (*allFlightTickets)[ticketChoice];
-                (*allFlightTickets).erase((*allFlightTickets).begin() + ticketChoice);
-                csvManager->saveAllFlightTickets();
-                delete (fT);
-            }
+
+            // increment seats in flight
+            int seatChoice = flightTickets[ticketChoice]->seatChoice;
+            flightTickets[ticketChoice]->flightPtr->bookedSeats[seatChoice]--;
+
+            // delete ticket from flightTickets;
+            FlightTicket *fT = flightTickets[ticketChoice];
+            flightTickets.erase(flightTickets.begin() + ticketChoice);
+
+            // update in file
+            csvManager->saveAllFlightTickets();
+
             success = true;
+            delete fT;
         }
     }
 
@@ -1490,55 +1584,6 @@ void UserManager::cancelTicketPanel(std::string transport)
         printAlert("Failed to cancel Ticket!\n" + message);
     }
 }
-void UserManager::changeUserPassword()
-{
-    std::vector<std::string> info = printChangePasswordPanel();
-    std::string message;
-    bool success = false;
-    if (info[1].size() == 0)
-    {
-        message = "Password is required.";
-    }
-    else if (info[1] != info[2])
-    {
-        message = "New password and Confirm password does not match.";
-    }
-    else if (info[0] != this->loggedInUser->getPassword())
-    {
-        message = "Wrong Old Password.";
-    }
-    else
-    {
-        loggedInUser->setPassword(info[1]);
-        // writing in file
-        csvManager->saveAllUsers();
-        success = true;
-    }
-
-    if (success)
-    {
-        printAlert("Password Changed Successfully");
-    }
-    else
-    {
-        printAlert("Failed to change password!\n" + message);
-    }
-}
-void UserManager::changeUserName()
-{
-    std::string newName = printChangeNamePanel(this->loggedInUser->fullName);
-    std::string message;
-    if (newName.size() == 0)
-        message = "Failed to change name!\nName is required.";
-    else
-    {
-        this->loggedInUser->fullName = newName;
-        // writing in file
-        csvManager->saveAllUsers();
-        message = "Name Updated Successfully";
-    }
-    printAlert(message);
-}
 
 // Terminal Class
 Terminal::Terminal(std::string name, std::string city, std::string code)
@@ -1549,7 +1594,7 @@ Terminal::Terminal(std::string name, std::string city, std::string code)
 }
 
 // FlightTicket Class
-FlightTicket::FlightTicket(int seatChoice, Flight *flightPtr, ListNode *boardingListNode, ListNode *destinationListNode, std::string pnr, DateTime *bookingDate)
+FlightTicket::FlightTicket(int seatChoice, Flight *flightPtr, ListNode *boardingListNode, ListNode *destinationListNode, std::string pnr, DateTime *bookingDate, std::string name, std::string email)
     : flightPtr(flightPtr)
 {
     this->seatChoice = seatChoice;
@@ -1558,10 +1603,12 @@ FlightTicket::FlightTicket(int seatChoice, Flight *flightPtr, ListNode *boarding
     this->destinationListNode = destinationListNode;
     this->bookingDate = bookingDate;
     this->price = flightPtr->seatPrices[seatChoice];
+    this->passengerName = name;
+    this->passengerEmail = email;
 }
 
 // TrainTicket Class
-TrainTicket::TrainTicket(int seatChoice, Train *trainPtr, ListNode *boardingListNode, ListNode *destinationListNode, std::string pnr, DateTime *bookingDate)
+TrainTicket::TrainTicket(int seatChoice, Train *trainPtr, ListNode *boardingListNode, ListNode *destinationListNode, std::string pnr, DateTime *bookingDate, std::string name, std::string email)
     : trainPtr(trainPtr)
 {
     this->seatChoice = seatChoice;
@@ -1570,6 +1617,8 @@ TrainTicket::TrainTicket(int seatChoice, Train *trainPtr, ListNode *boardingList
     this->destinationListNode = destinationListNode;
     this->bookingDate = bookingDate;
     this->price = trainPtr->seatPrices[seatChoice];
+    this->passengerName = name;
+    this->passengerEmail = email;
 }
 
 // Transport Class
@@ -1864,7 +1913,7 @@ void CSVManager ::loadAllFlightTickets()
             int seatType = stoi(seatChoice);
             DateTime *bookingDateTime = stringToDateTime(bookigDate);
 
-            user->flightTickets.push_back(new FlightTicket(seatType, flight, boardingTerminal, destinationTerminal, pnr, bookingDateTime));
+            user->flightTickets.push_back(new FlightTicket(seatType, flight, boardingTerminal, destinationTerminal, pnr, bookingDateTime, user->fullName, user->email));
             flight->bookedSeats[seatType]++;
         }
     }
@@ -1917,7 +1966,7 @@ void CSVManager ::loadAllTrainTickets()
             auto terminals = terminalInTransportRoute(train->coveringCities, boarding);
 
             train->bookedSeats[seatType]++;
-            user->trainTickets.push_back(new TrainTicket(seatType, train, boardingTerminal, destinationTerminal, pnr, bookingDateTime));
+            user->trainTickets.push_back(new TrainTicket(seatType, train, boardingTerminal, destinationTerminal, pnr, bookingDateTime, user->fullName, user->email));
         }
     }
 
