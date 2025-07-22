@@ -206,7 +206,7 @@ void printFlightDetails(int count, const Flight *flight)
     std::cout << "║       │ Business Class │" << putInCenter("Rs. " + std::to_string(flight->seatPrices[1]), 12) << "│" + putLeftPaddingAndFillRight(std::to_string(flight->totalSeats[1]) + "(" + std::to_string(flight->totalSeats[1] - flight->bookedSeats[1]) + ")", 10, 32) << "│       ║\n";
     std::cout << "║       └────────────────┴────────────┴────────────────────────────────┘       ║\n";
 }
-void printAllTrains(const auto &trainsList)
+void printAllTrains(const std::vector<std::pair<std::string, Train *>> &trainsList)
 {
     system("cls");
     std::cout << "╔══════════════════════════════════════════════════════════════════════════════╗" << "\n";
@@ -234,7 +234,7 @@ void printAllTrains(const auto &trainsList)
     std::cout << "║" << putInCenter("") << "║" << "\n";
     std::cout << "╚══════════════════════════════════════════════════════════════════════════════╝" << "\n";
 }
-void printAllFlights(const auto &flightsList)
+void printAllFlights(const std::vector<std::pair<std::string, Flight *>> &flightsList)
 {
     system("cls");
     std::cout << "╔══════════════════════════════════════════════════════════════════════════════╗" << "\n";
@@ -262,7 +262,7 @@ void printAllFlights(const auto &flightsList)
     std::cout << "║" << putInCenter("") << "║" << "\n";
     std::cout << "╚══════════════════════════════════════════════════════════════════════════════╝" << "\n";
 }
-void printAllTerminals(std::string terminal, const auto &terminalsList)
+void printAllTerminals(std::string terminal, const std::vector<std::pair<std::string, Terminal *>> &terminalsList)
 {
     system("cls");
     std::cout << "╔══════════════════════════════════════════════════════════════════════════════╗" << "\n";
