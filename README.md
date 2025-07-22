@@ -15,23 +15,37 @@ This is a virtual ticket booking program for demonstration purposes only. It doe
 
 ## Key Features
 
-### For Users
-- Register and login
-- View available trains and flights
-- Book tickets (train or flight)
-- View booked tickets
-- Cancel tickets
-- Update profile (name, password)
+- User Registration
+- Separate user and admin login
+- View available schedules
+- User capabilities:
+   - Can book and manage tickets
+   - Can update profile
+- Admin capabilities:
+   - Add and remove transports/terminals
+   - View all available transports/terminals
+- Use of **.csv** files fo persistence data storage
+ 
+## Sections Overview
 
-### For Admins
-Two types of admin access:
-- **Train Admin**
-- **Flight Admin**
-
-Admin capabilities:
-- Add and remove trains/flights
-- Add and remove stations/airports
-- View all available transports and terminals
+### 1. Guest Panel
+   - Can check for available schedules
+   - Can register with unique email id
+   - Can login using registered email to manage bookings 
+### 2. User Panel
+   - Book tickets (train or flight)
+   - View booked tickets
+   - Cancel tickets
+   - Update profile (Name, Password)
+### 3. Admin Panel (Two types of admin access)
+   - **Train Admin**
+   - **Flight Admin**
+### 4. Train Admin capabilities:
+   - Add and remove train/station
+   - View all available trains/stations   
+### 5. Flight Admin capabilities:
+   - Add and remove flight/airport
+   - View all available flights/airports
 
 ## Setup Instructions
 
@@ -39,7 +53,7 @@ Admin capabilities:
 - C++17 or higher
 - Windows terminal (some Windows-specific functions have been used.)
 
-### How to Run
+### Program Execution
 1. Clone this repository
 
    ```bash
