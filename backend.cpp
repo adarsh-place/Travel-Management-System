@@ -1042,9 +1042,18 @@ std::string User::getPassword()
 {
     return this->password;
 }
-void User::setPassword(std::string newPassword)
+bool User::isCorrectPassword(std::string pass)
 {
-    this->password = newPassword;
+    return pass == this->password;
+}
+bool User::setPassword(std::string oldPasword, std::string newPassword)
+{
+    if (oldPasword == this->password)
+    {
+        this->password = newPassword;
+        return true;
+    }
+    return false;
 }
 
 // UserManager Class
@@ -1142,7 +1151,7 @@ void UserManager::userLoginPanel()
     else
     {
         User *tempPtr = findUser(inputs[0]);
-        if (tempPtr != NULL && inputs[1] == tempPtr->getPassword())
+        if (tempPtr != NULL && tempPtr->isCorrectPassword(inputs[1]))
         {
             loggedInUser = tempPtr;
             success = true;
@@ -1231,16 +1240,19 @@ void UserManager::changeUserPassword()
     {
         message = "New password and Confirm password does not match.";
     }
-    else if (info[0] != this->loggedInUser->getPassword())
-    {
-        message = "Wrong Old Password.";
-    }
     else
     {
-        loggedInUser->setPassword(info[1]);
-        // writing in file
-        csvManager->saveAllUsers();
-        success = true;
+        bool isDone = loggedInUser->setPassword(info[0], info[1]);
+        if (isDone)
+        {
+            // writing in file
+            csvManager->saveAllUsers();
+            success = true;
+        }
+        else
+        {
+            message = "Wrong Old Password.";
+        }
     }
 
     if (success)

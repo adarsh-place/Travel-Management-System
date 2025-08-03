@@ -123,7 +123,8 @@ public:
     User() {}
     User(std::string fullName, std::string email, std::string password) : fullName(fullName), email(email), password(password) {}
     std::string getPassword();
-    void setPassword(std::string newPassword);
+    bool isCorrectPassword(std::string pass);
+    bool setPassword(std::string oldPasword,std::string newPassword);
 };
 
 class TicketManager
