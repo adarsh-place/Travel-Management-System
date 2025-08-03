@@ -2,15 +2,12 @@
 
 int main()
 {
-    // for light blue color text
-    std::cout << "\x1b[32m";
+    // for cyan color text
+    std::cout << "\x1b[36m";
     
     // for ascii characters
     system("chcp 65001");
 
-    // for emoji
-    std::setlocale(LC_ALL, "");
-    
     // seed for random
     srand(static_cast<unsigned int>(std::time(0)));
     
